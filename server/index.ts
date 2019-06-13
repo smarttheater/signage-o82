@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 const isDev = process.env.NODE_ENV !== 'production';
 if (isDev) {
     config();
+    console.log('dotenv loaded.');
 }
 import * as https from 'https';
 import * as express from 'express';
@@ -52,7 +53,7 @@ const server = isDev
 const socketIoServer: IMySocketServer = createSocketIoServer(server);
 
 /**
- *  必要な環境変数が欠けていたら即死
+ *  必要な環境変数が欠けていたら500表示
  */
 const missingEnvKeyArray = SERVER_REQUIRED_ENV_KEY_ARRAY.filter((REQUIRED_ENV_KEY) => {
     return process.env[REQUIRED_ENV_KEY] == null;
@@ -90,4 +91,4 @@ app.use(expressErrorLogger);
 
 server.listen(port);
 
-console.log('[app] staterd.');
+console.log(`[app] server started on port ${port}...`);
