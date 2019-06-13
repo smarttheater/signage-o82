@@ -6,10 +6,16 @@ import { ENUM_SOCKETIO_EVENT_NAMES, ISocketSubscribeRequst, EventID, IStatusData
 export interface IMySocketServer extends socketIo.Server {
     emitData?: Function;
 }
+
+// const subscribers: { [key:string]: string[]; } = {};
+
 export const createSocketIoServer = (server: any): IMySocketServer => {
     const io: IMySocketServer = socketIo(server);
     io.on(ENUM_SOCKETIO_EVENT_NAMES.CONNECTION, (socket) => {
         socket.on(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE, (subscribeRequst: ISocketSubscribeRequst) => {
+            if (Object.keys(socket.rooms).length === subscribeRequst.dataTargetArray.length) {
+                return socket.emit(ENUM_SOCKETIO_EVENT_NAMES.ALREADY_GRANTED, socket.rooms);
+            }
             try {
                 try {
                     verifyToken(subscribeRequst.jwt);

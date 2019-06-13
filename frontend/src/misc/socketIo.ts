@@ -21,7 +21,11 @@ export const getSocket = (args: IGetSocketArgs): Promise<SocketIOClient.Socket> 
                 args.options.host = LOCAL_API_URL;
             }
             const socket = io(args.options);
-            socket.on('connect', () => {
+            // 切断
+            socket.on(ENUM_SOCKETIO_EVENT_NAMES.DISCONNECTED, () => {
+                console.log(`[socket.io] Disconnected.`);
+            });
+            socket.once('connect', () => {
                 console.log(`[socket.io] Connected.`);
                 // 購読情報を申告
                 socket.emit(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE, {
@@ -29,21 +33,25 @@ export const getSocket = (args: IGetSocketArgs): Promise<SocketIOClient.Socket> 
                     jwt: args.jwt,
                 } as ISocketSubscribeRequst);
                 // 成功
-                socket.on(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE_GRANTED, () => {
+                socket.once(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE_GRANTED, () => {
                     console.log(`[socket.io] Subscribe Granted ([${args.dataTargetArray.join(', ')}]).`);
+                    socket.removeAllListeners();
+                    resolve(socket);
+                });
+                // 成功
+                socket.once(ENUM_SOCKETIO_EVENT_NAMES.ALREADY_GRANTED, () => {
+                    console.log(`[socket.io] Subscribe Already Granted ([${args.dataTargetArray.join(', ')}]).`);
+                    socket.removeAllListeners();
                     resolve(socket);
                 });
                 // 認証失敗(closeする)
-                socket.on(ENUM_SOCKETIO_EVENT_NAMES.CONNECTION_REJECTED, (msg: string) => {
+                socket.once(ENUM_SOCKETIO_EVENT_NAMES.CONNECTION_REJECTED, (msg: string) => {
                     const errmsg = `[socket.io] Rejected. ${msg}`;
                     console.log(errmsg);
+                    socket.removeAllListeners();
                     socket.close();
-                    reject(new Error('`[socket.io] connenction rejected.`'));
                     API_LOGGER(errmsg).catch();
-                });
-                // 切断
-                socket.on(ENUM_SOCKETIO_EVENT_NAMES.DISCONNECTED, () => {
-                    console.log(`[socket.io] Disconnected.`);
+                    reject(new Error('`[socket.io] connenction rejected.`'));
                 });
             });
         } catch (e) {

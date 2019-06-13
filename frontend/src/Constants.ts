@@ -95,6 +95,7 @@ export enum ENUM_LOCAL_EVENT_STATUS_TYPE {
 export enum ENUM_SOCKETIO_EVENT_NAMES {
     SUBSCRIBE = 'subscribe',
     SUBSCRIBE_GRANTED = 'subscribeGranted',
+    ALREADY_GRANTED = 'alreadyGranted',
     CONNECTION_REJECTED = 'connenctionRejected',
     DATA_UPDATED = 'dataUpdated',
     CONNECT = 'connect',
