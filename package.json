@@ -5,6 +5,7 @@
     "author": "shun@motionpicture.jp",
     "private": true,
     "scripts": {
+        "start": "node ./dist/index.js",
         "dev": "npm run watch",
         "watch": "cross-env NODE_ENV=development && npm-run-all --parallel watch:webpack watch:server",
         "watch:webpack": "webpack --watch",
