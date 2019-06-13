@@ -4,6 +4,7 @@ if (isDev) {
     config();
     console.log('dotenv loaded.');
 }
+import * as http from 'http';
 import * as https from 'https';
 import * as express from 'express';
 import { redirectToHTTPS } from 'express-http-to-https';
@@ -13,7 +14,7 @@ import * as helmet from 'helmet';
 import * as history from 'connect-history-api-fallback';
 import { readFileSync } from 'fs';
 import { IMySocketServer, createSocketIoServer } from './socketIo';
-import { expressErrorLogger } from './logger/winston';
+import { expressErrorLogger, catchErrorLogger } from './logger/winston';
 import { checkUserAuth } from './middleware/checkUserAuth';
 import { ApiRouter } from './api';
 import { SERVER_REQUIRED_ENV_KEY_ARRAY, PORT_LOCAL_SERVER, LOCAL_FRONT_URL, PATH_DIST_JSON, IProcessEnv } from './Constants';
@@ -30,65 +31,71 @@ declare global {
     }
 }
 
-const port = process.env.PORT || PORT_LOCAL_SERVER;
-const corsOptions: cors.CorsOptions = {
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: ['Origin', 'X-Requested-With', 'token', 'Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['token'],
-    credentials: true,
-};
-if (isDev) {
-    corsOptions.origin = [LOCAL_FRONT_URL];
-}
-const app = express();
-const server = isDev
-    ? https.createServer(
-          {
-              key: readFileSync('./localhost.key'),
-              cert: readFileSync('./localhost.crt'),
-          },
-          app,
-      )
-    : https.createServer(app);
-const socketIoServer: IMySocketServer = createSocketIoServer(server);
-
-/**
- *  必要な環境変数が欠けていたら500表示
- */
-const missingEnvKeyArray = SERVER_REQUIRED_ENV_KEY_ARRAY.filter((REQUIRED_ENV_KEY) => {
-    return process.env[REQUIRED_ENV_KEY] == null;
-});
-app.use((_, res, next) => {
-    if (missingEnvKeyArray.length) {
-        return res.status(500).send(`[FATAL] server env missing: ${missingEnvKeyArray.join(', ')}`);
+try {
+    const port = isDev ? PORT_LOCAL_SERVER : process.env.PORT;
+    const corsOptions: cors.CorsOptions = {
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        allowedHeaders: ['Origin', 'X-Requested-With', 'token', 'Content-Type', 'Authorization', 'Accept'],
+        exposedHeaders: ['token'],
+        credentials: true,
+    };
+    if (isDev) {
+        corsOptions.origin = [LOCAL_FRONT_URL];
     }
-    return next();
-});
+    const app = express();
+    const server = isDev
+        ? https.createServer(
+              {
+                  key: readFileSync('./localhost.key'),
+                  cert: readFileSync('./localhost.crt'),
+              },
+              app,
+          )
+        : http.createServer(app);
+    const socketIoServer: IMySocketServer = createSocketIoServer(server);
 
-// アクセス設定
-app.use(redirectToHTTPS())
-    .use(cors(corsOptions))
-    .use(helmet())
-    .use(bodyParser.json());
-
-// JSONファイル置き場
-app.use('/json', checkUserAuth(), express.static(PATH_DIST_JSON));
-
-// API (各コントローラからsocketにemitできるようにreqに埋め込む)
-app.use(
-    '/api',
-    (req, _, next) => {
-        req.io = socketIoServer;
+    /**
+     *  必要な環境変数が欠けていたら500表示
+     */
+    const missingEnvKeyArray = SERVER_REQUIRED_ENV_KEY_ARRAY.filter((REQUIRED_ENV_KEY) => {
+        return process.env[REQUIRED_ENV_KEY] == null;
+    });
+    app.use((_, res, next) => {
+        if (missingEnvKeyArray.length) {
+            return res.status(500).send(`[FATAL] server env missing: ${missingEnvKeyArray.join(', ')}`);
+        }
         return next();
-    },
-    ApiRouter,
-);
+    });
+    console.log('required env missing:', missingEnvKeyArray);
 
-// [/json, /api, /socket.io]以外はVueRouterが受け持つ
-app.use(history()).use(express.static('./frontend/dist'));
+    // アクセス設定
+    app.use(redirectToHTTPS())
+        .use(cors(corsOptions))
+        .use(helmet())
+        .use(bodyParser.json());
 
-app.use(expressErrorLogger);
+    // JSONファイル置き場
+    app.use('/json', checkUserAuth(), express.static(PATH_DIST_JSON));
 
-server.listen(port);
+    // API (各コントローラからsocketにemitできるようにreqに埋め込む)
+    app.use(
+        '/api',
+        (req, _, next) => {
+            req.io = socketIoServer;
+            return next();
+        },
+        ApiRouter,
+    );
 
-console.log(`[app] server started on port ${port}...`);
+    // [/json, /api, /socket.io]以外はVueRouterが受け持つ
+    app.use(history()).use(express.static('./frontend/dist'));
+
+    app.use(expressErrorLogger);
+
+    server.listen(port);
+
+    console.log(`[app] server started on port ${port}...`);
+} catch (e) {
+    console.log('[FATAL][app]', e);
+    catchErrorLogger.error(`[FATAL][app] ${e.message}`);
+}

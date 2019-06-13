@@ -1,4 +1,3 @@
-import { Server } from 'https';
 import * as socketIo from 'socket.io';
 import { catchErrorLogger, authErrorLogger } from './logger/winston';
 import { verifyToken } from './middleware/checkUserAuth';
@@ -7,7 +6,7 @@ import { ENUM_SOCKETIO_EVENT_NAMES, ISocketSubscribeRequst, EventID, IStatusData
 export interface IMySocketServer extends socketIo.Server {
     emitData?: Function;
 }
-export const createSocketIoServer = (server: Server): IMySocketServer => {
+export const createSocketIoServer = (server: any): IMySocketServer => {
     const io: IMySocketServer = socketIo(server);
     io.on(ENUM_SOCKETIO_EVENT_NAMES.CONNECTION, (socket) => {
         socket.on(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE, (subscribeRequst: ISocketSubscribeRequst) => {
