@@ -7,7 +7,7 @@ if (isDev) {
 import * as http from 'http';
 import * as https from 'https';
 import * as express from 'express';
-import { redirectToHTTPS } from 'express-http-to-https';
+// import { redirectToHTTPS } from 'express-http-to-https';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
@@ -69,7 +69,8 @@ try {
     console.log('required env missing:', missingEnvKeyArray);
 
     // アクセス設定
-    app.use(redirectToHTTPS())
+    app
+        // .use(redirectToHTTPS())
         .use(cors(corsOptions))
         .use(helmet())
         .use(bodyParser.json());
