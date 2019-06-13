@@ -9,12 +9,13 @@
         "watch": "cross-env NODE_ENV=development && npm-run-all --parallel watch:webpack watch:server",
         "watch:webpack": "webpack --watch",
         "watch:server": "nodemon dist/index.js",
+        "build": "webpack --mode production",
         "frontbuild": "npm -prefix frontend run build",
-        "build": "webpack --mode production && npm run frontbuild"
+        "fullbuild": "npm -prefix frontend run build"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm run build && git add --all"
+            "pre-commit": "npm run fullbuild && git add --all"
         }
     },
     "devDependencies": {
