@@ -1,0 +1,28 @@
+{
+    "rulesDirectory": ["tslint-plugin-prettier"],
+    "extends": ["tslint-config-standard", "tslint-config-prettier"],
+    "rules": {
+        "max-line-length": [
+            true,
+            {
+                "limit": 192
+            }
+        ],
+        "await-promise": true,
+        "prettier": [
+            true,
+            {
+                "eslintIntegration": false,
+                "printWidth": 192,
+                "wrapAttributes": false,
+                "arrowParens": "always",
+                "tabWidth": 4,
+                "singleQuote": true,
+                "trailingComma": "all"
+            }
+        ]
+    },
+    "linterOptions": {
+        "exclude": ["node_modules", "frontend", "frontend/node_modules"]
+    }
+}

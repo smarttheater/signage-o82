@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "module": "commonjs",
+        "strict": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "removeComments": true,
+        "sourceMap": false,
+        "target": "es2017",
+        "lib": ["es6", "dom"],
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "typeRoots": ["node_modules/@types"]
+    },
+    "include": ["./server/**/*"],
+    "exclude": ["node_modules", "frontend"]
+}

@@ -1,0 +1,108 @@
+import axios from './axios';
+import store from '../store';
+import dayjs from 'dayjs';
+import { API_LOGGER } from '../misc/api';
+import { ENUM_LOCAL_EVENT_IDS, IStatusDataDic, IScreeningEvent, ENUM_CONFIG_STATUS_THRESHOLD_TYPE, ENUM_TIKECT_STATUS } from '../Constants';
+
+// PHPなどのsleepと同じ
+export const sleep = (ms: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const setErrMsg = (msg: string): void => {
+    const logmsg = msg ? `[${dayjs().format('YYYY-MM-DD HH:mm:ss')}]${msg}` : '';
+    if (logmsg) {
+        API_LOGGER(logmsg).catch();
+    }
+    return store.commit('SET_errMsg', logmsg);
+};
+
+// Promiseにタイムアウトを付ける
+export const promiseTimeoutWrapper = (ms: number, promise: Promise<any>) => {
+    return Promise.race([
+        new Promise((resolve, reject) =>
+            setTimeout(() => {
+                return reject(new Error(`Timeout Error (${ms}ms)`));
+            }, ms),
+        ),
+        promise,
+    ]);
+};
+
+// 現在時刻から次の更新時刻までのsetTimeout用msを得る
+export const getNextTickUnixtime = (): number => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1, 0, 0).getTime() - now.getTime();
+};
+
+// EVENTIDチェック
+export const validateLocalEventName = (name: string): void => {
+    if (!name || !(name in ENUM_LOCAL_EVENT_IDS)) {
+        throw new Error('invalid name.');
+    }
+};
+
+// チケットのステータスから〇△×を決定する
+export const judgeStatusOfScreeningEvent = (screeningEvent: IScreeningEvent): ENUM_TIKECT_STATUS => {
+    const CONFIG_STATUS_THRESHOLD_TYPE = store.state.config.CONFIG_STATUS_THRESHOLD_TYPE;
+    const CONFIG_STATUS_THRESHOLD_VALUE_CROWDED = parseInt(store.state.config.CONFIG_STATUS_THRESHOLD_VALUE_CROWDED, 10);
+    if (!CONFIG_STATUS_THRESHOLD_TYPE || !CONFIG_STATUS_THRESHOLD_VALUE_CROWDED) {
+        throw new Error('both of env CONFIG_STATUS_THRESHOLD_TYPE & CONFIG_STATUS_THRESHOLD_VALUE_CROWDED required');
+    }
+    const { remainingAttendeeCapacity, maximumAttendeeCapacity } = screeningEvent;
+    if (!remainingAttendeeCapacity || !maximumAttendeeCapacity) {
+        return ENUM_TIKECT_STATUS.SOLDOUT;
+    }
+    // 割合(PERCENTAGE) || 判定か絶対数(NUMBER)で判定
+    if (CONFIG_STATUS_THRESHOLD_TYPE === ENUM_CONFIG_STATUS_THRESHOLD_TYPE.PERCENTAGE) {
+        const remainPercentage = (remainingAttendeeCapacity / maximumAttendeeCapacity) * 100;
+        if (remainPercentage <= CONFIG_STATUS_THRESHOLD_VALUE_CROWDED) {
+            return ENUM_TIKECT_STATUS.CROWDED;
+        }
+    } else if (CONFIG_STATUS_THRESHOLD_TYPE === ENUM_CONFIG_STATUS_THRESHOLD_TYPE.NUMBER) {
+        if (remainingAttendeeCapacity <= CONFIG_STATUS_THRESHOLD_VALUE_CROWDED) {
+            return ENUM_TIKECT_STATUS.CROWDED;
+        }
+    } else {
+        throw new Error(`invalid CONFIG_STATUS_THRESHOLD_TYPE: ${CONFIG_STATUS_THRESHOLD_TYPE}`);
+    }
+    return ENUM_TIKECT_STATUS.CAPABLE;
+};
+
+// JSONファイル取得インスタンスを立てる
+export class LocalJsonFetcher {
+    public requiredNameArray: string[];
+
+    constructor(requiredNameArray: ENUM_LOCAL_EVENT_IDS[]) {
+        requiredNameArray.forEach((name) => {
+            validateLocalEventName(name);
+        });
+        this.requiredNameArray = requiredNameArray;
+    }
+
+    public fetchData(): Promise<IStatusDataDic> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await Promise.all(
+                    this.requiredNameArray.map((name: string) => {
+                        validateLocalEventName(name);
+                        return axios().get(`/json/${name}.json?${Date.now()}`);
+                    }),
+                );
+                resolve(
+                    this.requiredNameArray.reduce((a: any, b: string, index: number) => {
+                        if (typeof res[index].data !== 'object') {
+                            return a;
+                        }
+                        a[b] = res[index].data;
+                        return a;
+                    }, {}),
+                );
+            } catch (e) {
+                setErrMsg(`[LocalJsonFetcher] ${e.message}`);
+                console.log(e);
+                reject(e);
+            }
+        });
+    }
+}

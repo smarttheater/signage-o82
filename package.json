@@ -1,0 +1,67 @@
+{
+    "name": "oyatsu_signage",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "author": "shun@motionpicture.jp",
+    "private": true,
+    "scripts": {
+        "dev": "npm run watch",
+        "watch": "cross-env NODE_ENV=development && npm-run-all --parallel watch:webpack watch:server",
+        "watch:webpack": "webpack --watch",
+        "watch:server": "nodemon dist/index.js",
+        "frontbuild": "npm -prefix frontend run build",
+        "build": "webpack --mode production && npm run frontbuild"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm run build && git add --all"
+        }
+    },
+    "devDependencies": {
+        "@types/connect-history-api-fallback": "^1.3.2",
+        "@types/cors": "^2.8.5",
+        "@types/dotenv": "^6.1.1",
+        "@types/express": "^4.17.0",
+        "@types/express-winston": "^3.0.3",
+        "@types/helmet": "^0.0.43",
+        "@types/jsonwebtoken": "^8.3.2",
+        "@types/node": "^12.0.8",
+        "@types/socket.io": "^2.1.2",
+        "@types/uuid": "^3.4.4",
+        "@types/winston": "^2.4.4",
+        "cross-env": "^5.2.0",
+        "husky": "^2.4.1",
+        "nodemon": "^1.19.1",
+        "npm-run-all": "^4.1.5",
+        "prettier": "^1.18.2",
+        "source-map-loader": "^0.2.4",
+        "ts-loader": "^6.0.2",
+        "ts-transformer-keys": "^0.3.5",
+        "tslint": "^5.17.0",
+        "tslint-config-prettier": "^1.18.0",
+        "tslint-config-standard": "^8.0.1",
+        "tslint-loader": "^3.5.4",
+        "tslint-plugin-prettier": "^2.0.1",
+        "typescript": "^3.5.1",
+        "webpack": "^4.34.0",
+        "webpack-cli": "^3.3.4",
+        "webpack-node-externals": "^1.7.2"
+    },
+    "dependencies": {
+        "@cinerino/api-nodejs-client": "^2.0.0-alpha.11",
+        "body-parser": "^1.19.0",
+        "connect-history-api-fallback": "^1.6.0",
+        "cors": "^2.8.5",
+        "dayjs": "^1.8.14",
+        "dotenv": "^8.0.0",
+        "express": "^4.17.1",
+        "express-http-to-https": "^1.1.4",
+        "express-winston": "^3.2.0",
+        "helmet": "^3.18.0",
+        "jsonwebtoken": "^8.5.1",
+        "socket.io": "^2.2.0",
+        "uuid": "^3.3.2",
+        "winston": "^3.2.1",
+        "winston-daily-rotate-file": "^3.9.0"
+    }
+}
