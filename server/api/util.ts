@@ -16,6 +16,7 @@ const getEnvConfigContoller = (_: Request, res: Response) => {
     );
 };
 
+// フロント用ロガー
 const clientLoggerContoller = (req: Request, res: Response) => {
     try {
         clientLogger.info(`[${req.ip}]${req.body.message}`);
