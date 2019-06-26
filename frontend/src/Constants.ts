@@ -24,8 +24,11 @@ export enum ENUM_CONFIG_STATUS_THRESHOLD_TYPE {
 
 // サーバに環境変数で設定、API経由で取得してstore.state.configにセットして利用
 export interface IAppConfig {
+    CONFIG_FORCEDATE: string; // 将来の日付のチケットを表示するためのYYYY-MM-DD
     CONFIG_STATUS_THRESHOLD_TYPE: ENUM_CONFIG_STATUS_THRESHOLD_TYPE; // チケット状況を〇から△にする閾値
     CONFIG_STATUS_THRESHOLD_VALUE_CROWDED: string; // チケット状況を〇から△にする閾値  数値だが環境変数なのでstring
+    CONFIG_MESSAGE_GUIDE_NONEXT: string; // 案内中表示画面で次の枠が無かった時のメッセージテキスト
+    CONFIG_MESSAGE_TIMETABLE_ALL_ENDED: string; // チケットのその日のスケジュールが全て終わった時に出すメッセージテキスト
 }
 
 export interface IProcessEnv extends IAppConfig {

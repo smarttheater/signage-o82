@@ -9,6 +9,7 @@ export const sleep = (ms: number): Promise<void> => {
     return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+// エラーメッセージを現在時刻付きでstoreへ
 export const setErrMsg = (msg: string): void => {
     const logmsg = msg ? `[${dayjs().format('YYYY-MM-DD HH:mm:ss')}]${msg}` : '';
     if (logmsg) {
@@ -27,6 +28,17 @@ export const promiseTimeoutWrapper = (ms: number, promise: Promise<any>) => {
         ),
         promise,
     ]);
+};
+
+// 配列を指定した要素数ずつに分割
+export const splitArray = (array: [], chunkSize: number): [[]] => {
+    let i = 0;
+    const length = array.length;
+    const ret: any = [];
+    for (i = 0; i < length; i += chunkSize) {
+        ret.push(array.slice(i, i + chunkSize));
+    }
+    return ret;
 };
 
 // 現在時刻から次の更新時刻までのsetTimeout用msを得る

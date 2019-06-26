@@ -1,9 +1,12 @@
 <template>
     <div v-if="is_initialized" class="svgcontainer guide2">
         <timer v-if="!socket" @tick="fetchJsonData"></timer>
-        <h1 v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName" :class="`status status-${eventName} status-type-${statusDataDic[eventName].type}`">
-            <span>{{ statusDataDic[eventName].statusString }}</span>
-        </h1>
+        <div v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName">
+            <h1 :class="`status status-${eventName} status-type-${statusDataDic[eventName].type}`">
+                <span>{{ statusDataDic[eventName].statusString }}</span>
+                <div v-show="statusDataDic[eventName].type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE" class="cover"></div>
+            </h1>
+        </div>
     </div>
 </template>
 
@@ -11,7 +14,7 @@
 import Vue from 'vue';
 import { getSocket } from '../misc/socketIo';
 import { LocalJsonFetcher, setErrMsg } from '../misc/util';
-import { ENUM_LOCAL_EVENT_IDS, ENUM_SOCKETIO_EVENT_NAMES, IStatusDataDic } from '../Constants';
+import { ENUM_LOCAL_EVENT_IDS, ENUM_SOCKETIO_EVENT_NAMES, ENUM_LOCAL_EVENT_STATUS_TYPE, IStatusDataDic } from '../Constants';
 
 const REQUIRED_JSONID_ARRAY = [ENUM_LOCAL_EVENT_IDS.FURIFURI, ENUM_LOCAL_EVENT_IDS.CRUNCH];
 
@@ -23,8 +26,9 @@ export default Vue.extend({
             busy_fetchJsonData: false,
             jsonFetcher: new LocalJsonFetcher(REQUIRED_JSONID_ARRAY),
             socket: null as null | SocketIOClient.Socket, // これがnullなら1分おきのタイマーがfetchJsonDataを叩く
-            REQUIRED_JSONID_ARRAY,
             statusDataDic: {} as IStatusDataDic,
+            REQUIRED_JSONID_ARRAY,
+            ENUM_LOCAL_EVENT_STATUS_TYPE,
         };
     },
     async created() {
@@ -91,15 +95,29 @@ export default Vue.extend({
         margin: 0;
         padding: 0;
         position: absolute;
+        .cover {
+            position: absolute;
+            top: 16vw;
+            margin-left: -15vw;
+            left: 50%;
+            width: 30vw;
+            height: 5vw;
+        }
     }
 }
 .status-CRUNCH {
     color: #864e2b;
     left: 0;
+    .cover {
+        background-color: #f1ebe7;
+    }
 }
 .status-FURIFURI {
     color: #f28b00;
     right: 0;
+    .cover {
+        background-color: #fef7ed;
+    }
 }
 .status-type-MESSAGE {
     top: 32vw;

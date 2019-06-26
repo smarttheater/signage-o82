@@ -1,8 +1,8 @@
 <template>
     <div v-if="is_initialized" class="svgcontainer info">
         <timer @tick="fetchData"></timer>
-        <h1 :class="`status status-body status-${statusTextData.noEvent ? 'text' : 'time'}`">{{ statusTextData.body }}</h1>
-        <h2 class="status status-footer">{{ statusTextData.footer }}</h2>
+        <h1 :class="`status status-body status-type-${statusMode}`">{{ statusTextData.body }}</h1>
+        <div v-if="statusMode === 'MESSAGE'" class="cover"></div>
     </div>
 </template>
 
@@ -15,7 +15,6 @@ import { setErrMsg } from '../misc/util';
 
 interface IStatusTextData {
     body: string;
-    footer: string;
     noEvent: boolean;
 }
 export default Vue.extend({
@@ -27,15 +26,21 @@ export default Vue.extend({
             statusTextData: {} as IStatusTextData,
         };
     },
+    computed: {
+        statusMode(): 'MESSAGE' | 'TIME' {
+            return this.statusTextData.noEvent ? 'MESSAGE' : 'TIME';
+        },
+    },
     async created() {
         await this.fetchData();
         this.is_initialized = true;
     },
     methods: {
         getDayJsObject(ymd?: Date): dayjs.Dayjs {
+            const CONFIG_FORCEDATE = this.$store.state.config.CONFIG_FORCEDATE;
             let dayjs_now = dayjs(ymd);
-            if (dayjs_now.isBefore(dayjs('2019-07-20'))) {
-                dayjs_now = dayjs(`2019-07-20 ${dayjs_now.format('HH:mm:ss')}`);
+            if (dayjs_now.isBefore(dayjs(CONFIG_FORCEDATE))) {
+                dayjs_now = dayjs(`${CONFIG_FORCEDATE} ${dayjs_now.format('HH:mm:ss')}`);
             }
             return dayjs_now;
         },
@@ -51,8 +56,8 @@ export default Vue.extend({
                     const eventArray = (await API_FETCH_TICKET_STATUS({
                         locationBranchCode: '001',
                         requiredEventIdentifierKeyArray: [ENUM_TICKET_EVENT_IDS.MYBABYSTAR],
-                        startFrom: dayjs_now.subtract(3, 'hour').toDate(),
-                        startThrough: dayjs_now.add(3, 'hour').toDate(),
+                        startFrom: dayjs_now.subtract(12, 'hour').toDate(),
+                        startThrough: dayjs_now.add(12, 'hour').toDate(),
                     })).MYBABYSTAR;
                     let currentEvent: IScreeningEvent | undefined;
                     if (eventArray && eventArray.length) {
@@ -64,8 +69,7 @@ export default Vue.extend({
                     }
                     const currentDoorTime = currentEvent ? dayjs(currentEvent.doorTime).format('HH:mm') : '';
                     this.statusTextData = {
-                        body: currentDoorTime || '準備中です',
-                        footer: currentDoorTime ? 'の方をご案内中です' : '',
+                        body: currentDoorTime || this.$store.state.config.CONFIG_MESSAGE_GUIDE_NONEXT,
                         noEvent: !currentEvent,
                     };
                 } catch (e) {
@@ -84,7 +88,6 @@ export default Vue.extend({
 .info {
     background-image: url('/guide1.svg');
 }
-
 .status {
     position: absolute;
     width: 100%;
@@ -94,8 +97,8 @@ export default Vue.extend({
 }
 .status-body {
     top: 28vw;
-    font-size: 17vw;
-    &.status-time::after {
+    font-size: 10.5vw;
+    &.status-type-TIME::after {
         content: '～';
         font-size: 12vw;
         margin-left: 1vw;
@@ -104,5 +107,14 @@ export default Vue.extend({
 .status-footer {
     top: 48vw;
     font-size: 3.6vw;
+}
+.cover {
+    position: absolute;
+    top: 48vw;
+    margin-left: -15vw;
+    left: 50%;
+    width: 30vw;
+    height: 5vw;
+    background-color: #faecee;
 }
 </style>

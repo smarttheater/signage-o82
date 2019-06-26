@@ -60,13 +60,14 @@ try {
     const missingEnvKeyArray = SERVER_REQUIRED_ENV_KEY_ARRAY.filter((REQUIRED_ENV_KEY) => {
         return process.env[REQUIRED_ENV_KEY] == null;
     });
+
     app.use((_, res, next) => {
         if (missingEnvKeyArray.length) {
+            console.log('required env missing:', missingEnvKeyArray);
             return res.status(500).send(`[FATAL] server env missing: ${missingEnvKeyArray.join(', ')}`);
         }
         return next();
     });
-    console.log('required env missing:', missingEnvKeyArray);
 
     // アクセス設定
     app

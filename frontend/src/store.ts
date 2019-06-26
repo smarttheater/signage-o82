@@ -6,7 +6,7 @@ import { IAppConfig, IUser } from './Constants';
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-    plugins: [createPersistedState()],
+    plugins: [createPersistedState({ storage: sessionStorage })],
     state: {
         user: {} as IUser,
         token: '' as string,

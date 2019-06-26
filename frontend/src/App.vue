@@ -1,13 +1,17 @@
 <template>
-    <div v-if="is_initialized" id="app">
+    <div v-if="is_initialized" id="app" :class="$route.meta.vertical ? 'verticalrender' : ''">
+        >
         <router-view v-if="is_logined" />
-        <div v-else>
-            <h1>Login</h1>
-            <input v-model="loginId" type="text" name="user" @keydown.enter="login" />
-            <input v-model="password" type="password" name="password" @keydown.enter="login" />
-            <button @click="login">login</button>
+        <div v-else class="loginform">
+            <h2>ID</h2>
+            <input v-model="loginId" type="text" name="userId" :disabled="busy_login" @keyup.enter="login" />
+
+            <h2>Password</h2>
+            <input v-model="password" type="password" name="password" :disabled="busy_login" @keyup.enter="login" />
+
+            <p class="btn btn-login" @click="login"><span>login</span></p>
+            <p v-if="$store.state.errMsg" class="errmsg">{{ $store.state.errMsg }}</p>
         </div>
-        <p v-if="$store.state.errMsg" class="errmsg">{{ $store.state.errMsg }}</p>
     </div>
 </template>
 
@@ -36,9 +40,9 @@ export default Vue.extend({
             // window.location.href = urlObject.href;
         };
         try {
-            console.log({ loginId, password });
             if (loginId && password) {
                 await this.execLogin(loginId, password);
+                this.$store.commit('SET_config', await API_FETCH_CONFIG());
             } else if (this.$store.state.token && this.$store.state.user) {
                 console.log(await API_CHECK_TOKEN(this.$store.state.token));
                 this.$store.commit('SET_config', await API_FETCH_CONFIG());
@@ -102,11 +106,40 @@ li {
 #app {
     position: relative;
     .errmsg {
-        position: absolute;
+        position: fixed;
         bottom: 4px;
         left: 4px;
         color: #d6c3b6;
         font-size: 10px;
+        background: #fff;
+    }
+}
+
+.loginform {
+    max-width: 640px;
+    padding: 48px;
+    margin: 96px auto;
+    background: #fafafa;
+    h2 {
+        margin-bottom: 0;
+        font-size: 24px;
+        user-select: none;
+    }
+    input {
+        display: block;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-bottom: 24px;
+        width: 100%;
+        font-size: 20px;
+        padding: 10px;
+    }
+    .btn-login {
+        display: table;
+        margin: 20px auto;
+        width: 160px;
+        height: 48px;
+        font-size: 24px;
     }
 }
 
@@ -118,6 +151,7 @@ li {
     padding: 0.4em;
     cursor: pointer;
     user-select: none;
+    text-align: center;
     &:hover {
         background-color: #999;
     }
@@ -125,18 +159,30 @@ li {
         display: table-cell;
     }
 }
+
 .svgcontainer {
     pointer-events: none;
     user-select: none;
     position: absolute;
-    width: 100vw;
-    height: 0;
-    padding-bottom: 56.25vw; // 16:9
     overflow: hidden;
     background-size: cover;
     background-repeat: no-repeat;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: 50%;
+    width: 100vw;
+    height: 0;
+    padding-bottom: 56.25vw; // 16:9
+}
+.verticalrender {
+    .svgcontainer {
+        width: 56.25vw;
+        height: 0;
+        padding-bottom: 100vw; // 16:9
+        top: -100vw;
+        left: 43.75vw;
+        transform: rotate(-90deg) !important;
+        transform-origin: bottom right !important;
+    }
 }
 </style>
