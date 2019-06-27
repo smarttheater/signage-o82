@@ -98,10 +98,14 @@ export default Vue.extend({
 .status-body {
     top: 28vw;
     font-size: 10.5vw;
-    &.status-type-TIME::after {
-        content: '～';
-        font-size: 12vw;
-        margin-left: 1vw;
+    &.status-type-TIME {
+        top: 24vw;
+        font-size: 20vw;
+        &::after {
+            content: '～';
+            font-size: 12vw;
+            margin-left: 1vw;
+        }
     }
 }
 .status-footer {
