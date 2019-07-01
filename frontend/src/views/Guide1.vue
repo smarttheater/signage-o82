@@ -37,7 +37,7 @@ export default Vue.extend({
     },
     methods: {
         getDayJsObject(): dayjs.Dayjs {
-            const CONFIG_FORCEDATE = (this.$route.query.yyyymmmdd as string) || this.$store.state.config.CONFIG_FORCEDATE;
+            const CONFIG_FORCEDATE = (this.$route.query.yyyymmdd as string) || this.$store.state.config.CONFIG_FORCEDATE;
             let dayjs_now = dayjs();
             if (CONFIG_FORCEDATE && dayjs_now.isBefore(dayjs(CONFIG_FORCEDATE))) {
                 dayjs_now = dayjs(`${CONFIG_FORCEDATE} ${dayjs_now.format('HH:mm:ss')}`);
