@@ -108,10 +108,10 @@ export default Vue.extend({
         this.is_initialized = true;
     },
     methods: {
-        getDayJsObject(ymd?: Date): dayjs.Dayjs {
-            const CONFIG_FORCEDATE = this.$store.state.config.CONFIG_FORCEDATE;
-            let dayjs_now = dayjs(ymd);
-            if (dayjs_now.isBefore(dayjs(CONFIG_FORCEDATE))) {
+        getDayJsObject(): dayjs.Dayjs {
+            const CONFIG_FORCEDATE = (this.$route.query.yyyymmmdd as string) || this.$store.state.config.CONFIG_FORCEDATE;
+            let dayjs_now = dayjs();
+            if (CONFIG_FORCEDATE && dayjs_now.isBefore(dayjs(CONFIG_FORCEDATE))) {
                 dayjs_now = dayjs(`${CONFIG_FORCEDATE} ${dayjs_now.format('HH:mm:ss')}`);
             }
             return dayjs_now;
@@ -122,11 +122,12 @@ export default Vue.extend({
                     return [];
                 }
                 const dayjs_now = this.getDayJsObject();
+                const CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES = parseInt(this.$store.state.config.CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES, 10);
                 const unFinishedEventArray = eventArray.filter((event) => {
                     if (!event.offers || dayjs_now.isAfter(dayjs(event.offers.availabilityStarts))) {
                         return false;
                     }
-                    return dayjs(dayjs_now).isBefore(event.endDate);
+                    return dayjs(dayjs_now).isBefore(dayjs(event.startDate).subtract(CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES, 'minute'));
                 });
                 if (unFinishedEventArray.length > 8) {
                     unFinishedEventArray.length = 8;
