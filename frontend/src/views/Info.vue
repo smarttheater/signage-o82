@@ -14,7 +14,7 @@
                         </li>
                     </ul>
                 </template>
-                <h1 v-else-if="is_allEnded.MYBABYSTAR" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED" class="allEndedMessage"></h1>
+                <h1 v-else-if="is_allEnded.MYBABYSTAR" class="allEndedMessage" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED"></h1>
             </div>
         </template>
 
@@ -27,7 +27,7 @@
                         </li>
                     </ul>
                 </template>
-                <h1 v-else-if="is_allEnded[ticketId]" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED" class="allEndedMessage"></h1>
+                <h1 v-else-if="is_allEnded[ticketId]" class="allEndedMessage" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED"></h1>
             </div>
         </template>
     </div>
@@ -174,7 +174,6 @@ export default Vue.extend({
                         },
                         {} as BoolsByTicketEventId,
                     );
-                    console.log('todayScheduleWasFound', todayScheduleWasFound);
                     if (this.isNoFactory) {
                         const statusArray = this.getManipuldatedTicketStatusArray(ticketStatus[ENUM_TICKET_EVENT_IDS.MYBABYSTAR]);
                         this.is_allEnded[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] = todayScheduleWasFound[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] && !statusArray.length;
