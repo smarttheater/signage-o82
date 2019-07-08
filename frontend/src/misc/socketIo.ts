@@ -36,6 +36,11 @@ export const getSocket = (args: IGetSocketArgs): Promise<SocketIOClient.Socket> 
                 socket.once(ENUM_SOCKETIO_EVENT_NAMES.SUBSCRIBE_GRANTED, () => {
                     console.log(`[socket.io] Subscribe Granted ([${args.dataTargetArray.join(', ')}]).`);
                     socket.removeAllListeners();
+                    // 強制リロード命令
+                    socket.on(ENUM_SOCKETIO_EVENT_NAMES.RELOAD_REQUIRED, () => {
+                        // tslint:disable-next-line
+                        return window.location.reload(true);
+                    });
                     resolve(socket);
                 });
                 // 成功済み

@@ -2,10 +2,10 @@
     <div v-if="is_initialized" class="svgcontainer guide2">
         <timer v-if="!socket" @tick="fetchJsonData"></timer>
         <div v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName">
-            <h1 :class="`status status-${eventName} status-type-${statusDataDic[eventName].type} status-length-${statusDataDic[eventName].statusString.length}`">
-                <span>{{ statusDataDic[eventName].statusString }}</span>
-                <div v-show="statusDataDic[eventName].statusString.length > 3" class="cover cover-now"></div>
-                <div v-show="statusDataDic[eventName].type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE" class="cover cover-waiting"></div>
+            <h1 :class="getStatusClassName(statusDataDic[eventName])">
+                <div class="cover cover-now"></div>
+                <span>{{ getStatusText(statusDataDic[eventName].statusString) }}</span>
+                <div class="cover cover-waiting"></div>
             </h1>
         </div>
     </div>
@@ -14,7 +14,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { getSocket } from '../misc/socketIo';
-import { LocalJsonFetcher, setErrMsg } from '../misc/util';
+import { LocalJsonFetcher, setErrMsg, getStatusStringText, getStatusClassName } from '../misc/util';
 import { ENUM_LOCAL_EVENT_IDS, ENUM_SOCKETIO_EVENT_NAMES, ENUM_LOCAL_EVENT_STATUS_TYPE, IStatusDataDic } from '../Constants';
 
 const REQUIRED_JSONID_ARRAY = [ENUM_LOCAL_EVENT_IDS.FURIFURI, ENUM_LOCAL_EVENT_IDS.CRUNCH];
@@ -44,6 +44,8 @@ export default Vue.extend({
         this.is_initialized = true;
     },
     methods: {
+        getStatusStringText,
+        getStatusClassName,
         // 更新受信用のソケットを確立
         connectSocket(): Promise<SocketIOClient.Socket | null> {
             return new Promise(async (resolve) => {
@@ -96,7 +98,9 @@ export default Vue.extend({
         margin: 0;
         padding: 0;
         position: absolute;
+        white-space: pre;
         .cover {
+            display: none;
             position: absolute;
             width: 30vw;
             height: 5vw;
@@ -107,6 +111,16 @@ export default Vue.extend({
             }
             &.cover-now {
                 top: -9vw;
+            }
+        }
+        &.status-hide-waiting {
+            .cover-waiting {
+                display: block;
+            }
+        }
+        &.status-hide-now {
+            .cover-now {
+                display: block;
             }
         }
     }
@@ -128,14 +142,19 @@ export default Vue.extend({
 .status-type-MESSAGE {
     top: 32vw;
     > span {
+        display: block;
         font-size: 13vw;
     }
     &.status-length-4 {
-        &::before {
-            content: '';
-        }
         > span {
             font-size: 11vw;
+        }
+    }
+    &.status-value-ENGAWAROOMDEKAISAICHU {
+        > span {
+            margin-top: -4vw;
+            font-size: 6.6vw;
+            line-height: 1.4;
         }
     }
 }

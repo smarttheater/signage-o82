@@ -6,7 +6,7 @@
             <div class="inner">
                 <div>
                     <select v-model="json.statusString">
-                        <option v-for="option in statusOptionsArray" :key="option.value" :value="option.value"> {{ option.text }} </option>
+                        <option v-for="option in getStatusOptions(json.name)" :key="option.value" :value="option.value"> {{ option.text }} </option>
                     </select>
                     <p class="btn btn-submit" @click="submitStatus(json.name)"><span>更新</span></p>
                 </div>
@@ -17,7 +17,7 @@
             <h1>一括操作</h1>
             <div class="inner">
                 <select v-model="allValue">
-                    <option v-for="option in statusOptionsArray" :key="option.value" :value="option.value"> {{ option.text }} </option>
+                    <option v-for="option in statusOptionsArrayNotEngawaRoom" :key="option.value" :value="option.value"> {{ option.text }} </option>
                 </select>
                 <p class="btn btn-submit" @click="allUpdate()"><span>更新</span></p>
             </div>
@@ -30,17 +30,17 @@
 import Vue from 'vue';
 import dayjs from 'dayjs';
 import { getSocket } from '../misc/socketIo';
-import { LocalJsonFetcher, validateLocalEventName } from '../misc/util';
+import { LocalJsonFetcher } from '../misc/util';
 import { API_UPDATE_LOCAL_EVENT_JSON, API_INIT_LOCAL_EVENT_JSON } from '../misc/api';
 import {
     ENUM_LOCAL_EVENT_IDS,
     EVENT_NAME_DIC,
     ENUM_SOCKETIO_EVENT_NAMES,
-    ENUM_LOCAL_EVENT_STATUS_TYPE,
     typeEventStatusString,
     IStatusDataDic,
+    ENUM_EVENT_STATUSSTRING_ID,
     EVENT_STATUSSTRING_VALUE_ARRAY,
-    ILocalEventJSON,
+    EVENT_STATUS_OPTION_ARRAY,
 } from '../Constants';
 
 export default Vue.extend({
@@ -64,12 +64,12 @@ export default Vue.extend({
         REQUIRED_JSONID_ARRAY(): ENUM_LOCAL_EVENT_IDS[] {
             return this.target === 'ALL' ? [ENUM_LOCAL_EVENT_IDS.CRUNCH, ENUM_LOCAL_EVENT_IDS.FURIFURI, ENUM_LOCAL_EVENT_IDS.ATHLETIC] : [this.target];
         },
-        statusOptionsArray() {
-            return EVENT_STATUSSTRING_VALUE_ARRAY.map((value) => {
-                return {
-                    value,
-                    text: typeof value !== 'number' ? value : `${value}分待ち`,
-                };
+        statusOptionsArray(): any[] {
+            return EVENT_STATUS_OPTION_ARRAY;
+        },
+        statusOptionsArrayNotEngawaRoom(): any[] {
+            return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
+                return option.value !== ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU;
             });
         },
     },
@@ -105,13 +105,13 @@ export default Vue.extend({
         }
     },
     methods: {
-        getValueText(value: number | string) {
-            if (typeof value === 'number') {
-                return `${value}分待ち`;
+        getStatusOptions(id: ENUM_LOCAL_EVENT_IDS): any[] {
+            if (id !== ENUM_LOCAL_EVENT_IDS.ATHLETIC) {
+                return this.statusOptionsArray;
             }
-            return value;
+            return this.statusOptionsArrayNotEngawaRoom;
         },
-        submitStatus(jsonName: ENUM_LOCAL_EVENT_IDS) {
+        submitStatus(jsonName: ENUM_LOCAL_EVENT_IDS): Promise<void> {
             return new Promise(async (resolve) => {
                 let msg = '';
                 try {

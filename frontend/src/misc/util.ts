@@ -2,7 +2,17 @@ import axios from './axios';
 import store from '../store';
 import dayjs from 'dayjs';
 import { API_LOGGER } from '../misc/api';
-import { ENUM_LOCAL_EVENT_IDS, IStatusDataDic, IScreeningEvent, ENUM_CONFIG_STATUS_THRESHOLD_TYPE, ENUM_TIKECT_STATUS } from '../Constants';
+import {
+    ENUM_LOCAL_EVENT_IDS,
+    IStatusDataDic,
+    IScreeningEvent,
+    ILocalEventJSON,
+    ENUM_CONFIG_STATUS_THRESHOLD_TYPE,
+    ENUM_TIKECT_STATUS,
+    ENUM_LOCAL_EVENT_STATUS_TYPE,
+    EVENT_ENUM_EVENT_STATUSSTRING_DIC,
+    ENUM_EVENT_STATUSSTRING_ID,
+} from '../Constants';
 
 // PHPなどのsleepと同じ
 export const sleep = (ms: number): Promise<void> => {
@@ -52,6 +62,27 @@ export const validateLocalEventName = (name: string): void => {
     if (!name || !(name in ENUM_LOCAL_EVENT_IDS)) {
         throw new Error('invalid name.');
     }
+};
+
+// ローカルイベントJSONのステータステキストを得る
+export const getStatusStringText = (value: number | string): string => {
+    return typeof value === 'number' ? String(value) : EVENT_ENUM_EVENT_STATUSSTRING_DIC[value as ENUM_EVENT_STATUSSTRING_ID];
+};
+
+// ローカルイベントJSONからclassNameを作る
+export const getStatusClassName = (eventJSON: ILocalEventJSON): string => {
+    const text = getStatusStringText(eventJSON.statusString);
+    let className = `status status-${eventJSON.name} status-type-${eventJSON.type} status-value-${eventJSON.statusString} status-length-${text.length} `;
+    if (text.length > 3) {
+        className += 'status-hide-now ';
+    }
+    if (eventJSON.type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE) {
+        className += 'status-hide-waiting ';
+    }
+    if (text.indexOf('\n') !== -1) {
+        className += 'status-type-multiline ';
+    }
+    return className;
 };
 
 // チケットのステータスから〇△×を決定する

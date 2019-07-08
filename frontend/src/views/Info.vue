@@ -1,12 +1,8 @@
 <template>
     <div v-if="is_initialized" :class="infoClassName">
         <timer @tick="fetchData"></timer>
-        <h1
-            v-for="eventName in REQUIRED_JSONID_ARRAY"
-            :key="eventName"
-            :class="`status status-${eventName} status-type-${eventStatus[eventName].type} status-length-${eventStatus[eventName].statusString.length}`"
-        >
-            <span>{{ eventStatus[eventName].statusString }}</span>
+        <h1 v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName" :class="getStatusClassName(eventStatus[eventName])">
+            <span>{{ getStatusStringText(eventStatus[eventName].statusString) }}</span>
         </h1>
 
         <template v-if="isNoFactory">
@@ -41,7 +37,7 @@
 import Vue, { PropType } from 'vue';
 import dayjs from 'dayjs';
 import { getSocket } from '../misc/socketIo';
-import { setErrMsg, LocalJsonFetcher, judgeStatusOfScreeningEvent, splitArray } from '../misc/util';
+import { setErrMsg, LocalJsonFetcher, judgeStatusOfScreeningEvent, getStatusStringText, getStatusClassName, splitArray } from '../misc/util';
 import { API_FETCH_TICKET_STATUS } from '../misc/api';
 import { ENUM_LOCAL_EVENT_IDS, ENUM_TICKET_EVENT_IDS, ENUM_SOCKETIO_EVENT_NAMES, IStatusDataDic, IScreeningEvent, TypeTicketsStatuses } from '../Constants';
 
@@ -115,6 +111,8 @@ export default Vue.extend({
         this.is_initialized = true;
     },
     methods: {
+        getStatusStringText,
+        getStatusClassName,
         getDayJsObject(): dayjs.Dayjs {
             const CONFIG_FORCEDATE = (this.$route.query.yyyymmdd as string) || this.$store.state.config.CONFIG_FORCEDATE;
             let dayjs_now = dayjs();
@@ -214,8 +212,12 @@ export default Vue.extend({
     .status {
         margin: 0;
         padding: 0;
+        white-space: pre;
         position: absolute;
         text-align: center;
+        &.status-type-multiline {
+            line-height: 1.4;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -277,6 +279,10 @@ export default Vue.extend({
         font-size: 7vw;
         width: 31.9vw;
         right: 0.4vw;
+        &.status-value-ENGAWAROOMDEKAISAICHU {
+            margin-top: -2vw;
+            font-size: 4vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -342,6 +348,10 @@ export default Vue.extend({
             font-size: 6vw;
             margin-top: 1vw;
         }
+        &.status-value-ENGAWAROOMDEKAISAICHU {
+            margin-top: -1vw;
+            font-size: 3.6vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -403,6 +413,10 @@ export default Vue.extend({
         top: 47vw;
         font-size: 7vw;
         width: 31.9vw;
+        &.status-value-ENGAWAROOMDEKAISAICHU {
+            margin-top: -2.4vw;
+            font-size: 4vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -476,6 +490,10 @@ export default Vue.extend({
         &.status-length-4 {
             font-size: 6vw;
             margin-top: 1vw;
+        }
+        &.status-value-ENGAWAROOMDEKAISAICHU {
+            margin-top: -1vw;
+            font-size: 3.6vw;
         }
     }
     .status-type-TIME {

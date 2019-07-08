@@ -122,16 +122,38 @@ export interface ISearchEventRequest {
     requiredEventIdentifierKeyArray: ENUM_TICKET_EVENT_IDS[];
 }
 
-export enum ENUM_EVENT_STATUSSTRING {
-    INPREPARATION = '準備中',
-    CLOSE = 'お休み',
-    END = '本日終了',
+export enum ENUM_EVENT_STATUSSTRING_ID {
+    INPREPARATION = 'INPREPARATION',
+    CLOSE = 'CLOSE',
+    END = 'END',
+    ENGAWAROOMDEKAISAICHU = 'ENGAWAROOMDEKAISAICHU',
 }
+export type EVENT_STATUSSTRING_ID = keyof typeof ENUM_EVENT_STATUSSTRING_ID;
+
+export const EVENT_ENUM_EVENT_STATUSSTRING_DIC = {
+    [ENUM_EVENT_STATUSSTRING_ID.INPREPARATION]: '準備中',
+    [ENUM_EVENT_STATUSSTRING_ID.CLOSE]: 'お休み',
+    [ENUM_EVENT_STATUSSTRING_ID.END]: '本日終了',
+    [ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU]: 'えんがわルーム\nで開催中',
+};
 
 const range = (start: number, stop: number, step: number): number[] => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-export const EVENT_STATUSSTRING_VALUE_ARRAY = [ENUM_EVENT_STATUSSTRING.INPREPARATION, ...range(0, 120, 5), ENUM_EVENT_STATUSSTRING.CLOSE, ENUM_EVENT_STATUSSTRING.END];
+export const EVENT_STATUSSTRING_VALUE_ARRAY: Array<number | ENUM_EVENT_STATUSSTRING_ID> = [
+    ENUM_EVENT_STATUSSTRING_ID.INPREPARATION,
+    ...range(0, 120, 5),
+    ENUM_EVENT_STATUSSTRING_ID.CLOSE,
+    ENUM_EVENT_STATUSSTRING_ID.END,
+    ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU,
+];
 
-export type typeEventStatusString = ENUM_EVENT_STATUSSTRING.INPREPARATION | ENUM_EVENT_STATUSSTRING.CLOSE | number;
+export const EVENT_STATUS_OPTION_ARRAY = EVENT_STATUSSTRING_VALUE_ARRAY.map((value) => {
+    return {
+        value,
+        text: typeof value !== 'number' ? EVENT_ENUM_EVENT_STATUSSTRING_DIC[value] : `${value}分待ち`,
+    };
+});
+
+export type typeEventStatusString = EVENT_STATUSSTRING_ID | number;
 
 export interface ILocalEventJSON {
     name: ENUM_LOCAL_EVENT_IDS;
