@@ -42,6 +42,11 @@ export const API_FETCH_CONFIG = (): Promise<IAppConfig> => {
     return APIREQ('FETCH_CONFIG', axios().post(`${API_ENDPOINT}/util/getEnvConfig`));
 };
 
+// socketで強制リロード命令
+export const API_FORCE_RELOAD = (): Promise<IAppConfig> => {
+    return APIREQ('FORCE_RELOAD', axios().post(`${API_ENDPOINT}/util/forceReload`));
+};
+
 // ログイン
 export const API_LOGIN = (loginId: string, password: string): Promise<{ token: string; user: IUser }> => {
     if (process.env.NODE_ENV === 'development') {

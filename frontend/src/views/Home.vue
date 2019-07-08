@@ -9,15 +9,18 @@
             </li>
         </ul>
         <hr />
-        <h1>管理画面</h1>
-        <ul>
-            <li v-for="eventId in adminEventIdArray" :key="eventId">
-                <h2>
-                    <router-link :to="{ path: `/admin/${eventId}` }">[/admin/{{ eventId }}] {{ EVENT_NAME_DIC[eventId] }}</router-link>
-                </h2>
-            </li>
-        </ul>
-        <hr />
+        <template v-if="$store.state.user.isAdmin">
+            <h1>管理画面</h1>
+            <ul>
+                <li v-for="eventId in adminEventIdArray" :key="eventId">
+                    <h2>
+                        <router-link :to="{ path: `/admin/${eventId}` }">[/admin/{{ eventId }}] {{ EVENT_NAME_DIC[eventId] }}</router-link>
+                    </h2>
+                </li>
+            </ul>
+            <p class="btn btn-reload" style="display:none;" @click="forceReload"><span>全画面強制リロード</span></p>
+            <hr />
+        </template>
         <p class="btn btn-logout" @click="logout"><span>ログアウト</span></p>
     </div>
 </template>
@@ -25,6 +28,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { RouteConfig } from 'vue-router';
+import { API_FORCE_RELOAD } from '../misc/api';
 import { ENUM_LOCAL_EVENT_IDS, EVENT_NAME_DIC } from '../Constants';
 
 export default Vue.extend({
@@ -47,6 +51,17 @@ export default Vue.extend({
     methods: {
         logout() {
             this.$store.dispatch('LOGOUT');
+        },
+        async forceReload() {
+            if (!window.confirm('全画面にリロードを命令しますか？')) {
+                return false;
+            }
+            try {
+                await API_FORCE_RELOAD();
+            } catch (e) {
+                alert(e.error || e.message);
+            }
+            return true;
         },
     },
 });

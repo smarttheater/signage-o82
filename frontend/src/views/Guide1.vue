@@ -9,8 +9,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import dayjs from 'dayjs';
-import { ENUM_TICKET_EVENT_IDS, IScreeningEvent } from '../Constants';
+import { ENUM_TICKET_EVENT_IDS, ENUM_SOCKETIO_EVENT_NAMES, IScreeningEvent } from '../Constants';
 import { API_FETCH_TICKET_STATUS } from '../misc/api';
+import { getSocket } from '../misc/socketIo';
 import { setErrMsg } from '../misc/util';
 
 interface IStatusTextData {
@@ -34,6 +35,17 @@ export default Vue.extend({
     async created() {
         await this.fetchData();
         this.is_initialized = true;
+        try {
+            const socket = await getSocket({
+                dataTargetArray: ['none'],
+                jwt: this.$store.state.token,
+            });
+            socket.on(ENUM_SOCKETIO_EVENT_NAMES.RELOAD_REQUIRED, () => {
+                window.location.reload(true);
+            });
+        } catch (e) {
+            console.log(e);
+        }
     },
     methods: {
         getDayJsObject(): dayjs.Dayjs {

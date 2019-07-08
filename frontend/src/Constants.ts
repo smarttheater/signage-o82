@@ -102,14 +102,16 @@ export enum ENUM_SOCKETIO_EVENT_NAMES {
     ALREADY_GRANTED = 'alreadyGranted',
     CONNECTION_REJECTED = 'connenctionRejected',
     DATA_UPDATED = 'dataUpdated',
+    RELOAD_REQUIRED = 'reloadRequired',
     CONNECT = 'connect',
     CONNECTION = 'connection',
     CONNECTED = 'connected',
     DISCONNECTED = 'disconnected',
 }
 
+type SubscribableID = EventID | 'none';
 export interface ISocketSubscribeRequst {
-    dataTargetArray: EventID[];
+    dataTargetArray: SubscribableID[];
     jwt: string;
 }
 

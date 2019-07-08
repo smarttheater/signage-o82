@@ -38,7 +38,7 @@ export const getSocket = (args: IGetSocketArgs): Promise<SocketIOClient.Socket> 
                     socket.removeAllListeners();
                     resolve(socket);
                 });
-                // 成功
+                // 成功済み
                 socket.once(ENUM_SOCKETIO_EVENT_NAMES.ALREADY_GRANTED, () => {
                     console.log(`[socket.io] Subscribe Already Granted ([${args.dataTargetArray.join(', ')}]).`);
                     socket.removeAllListeners();

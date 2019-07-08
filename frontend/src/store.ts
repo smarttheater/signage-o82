@@ -30,7 +30,6 @@ export default new Vuex.Store({
     actions: {
         LOGOUT({ commit }) {
             commit('SET_token', '');
-            commit('SET_isAdmin', false);
             commit('SET_config', {});
             commit('SET_errMsg', '');
             return window.location.reload(true);
