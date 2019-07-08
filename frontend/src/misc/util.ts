@@ -86,7 +86,7 @@ export const getStatusClassName = (eventJSON: ILocalEventJSON): string => {
 };
 
 // チケットのステータスから〇△×を決定する
-export const judgeStatusOfScreeningEvent = (screeningEvent: IScreeningEvent): ENUM_TIKECT_STATUS => {
+export const judgeStatusOfScreeningEvent = (screeningEvent: { remainingAttendeeCapacity: number; maximumAttendeeCapacity: number }): ENUM_TIKECT_STATUS => {
     const CONFIG_STATUS_THRESHOLD_TYPE = store.state.config.CONFIG_STATUS_THRESHOLD_TYPE;
     const CONFIG_STATUS_THRESHOLD_VALUE_CROWDED = parseInt(store.state.config.CONFIG_STATUS_THRESHOLD_VALUE_CROWDED, 10);
     if (!CONFIG_STATUS_THRESHOLD_TYPE || !CONFIG_STATUS_THRESHOLD_VALUE_CROWDED) {

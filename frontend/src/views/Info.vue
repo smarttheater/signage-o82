@@ -128,18 +128,38 @@ export default Vue.extend({
                 }
                 const dayjs_now = this.getDayJsObject();
                 const CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES = parseInt(this.$store.state.config.CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES, 10);
-                const unFinishedEventArray = eventArray.filter((event) => {
-                    if (!event.offers || dayjs_now.isAfter(dayjs(event.offers.availabilityStarts))) {
-                        return false;
-                    }
-                    return dayjs(dayjs_now).isBefore(dayjs(event.startDate).subtract(CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES, 'minute'));
-                });
-                if (unFinishedEventArray.length > 8) {
-                    unFinishedEventArray.length = 8;
+                // 予約分と当日現地販売分で在庫が別々で存在するのでstartDateをキーにしてマージする
+                const unstartedEventsByStartDate = eventArray
+                    .filter((event) => {
+                        return dayjs(dayjs_now).isBefore(dayjs(event.startDate).subtract(CONFIG_STATUS_DEADLINE_BEFORESTARTMINUTES, 'minute'));
+                    })
+                    .reduce(
+                        (ret, event) => {
+                            const startDate = dayjs(event.startDate).format('YYYYMMDDHHmm');
+                            ret[startDate] = ret[startDate] || {
+                                id: event.id,
+                                remainingAttendeeCapacity: 0,
+                                maximumAttendeeCapacity: 0,
+                                startDate: event.startDate,
+                                endDate: event.endDate,
+                            };
+                            ret[startDate].remainingAttendeeCapacity += event.remainingAttendeeCapacity;
+                            ret[startDate].maximumAttendeeCapacity += event.maximumAttendeeCapacity;
+                            return ret;
+                        },
+                        {} as any,
+                    );
+                const startDateArray = Object.keys(unstartedEventsByStartDate);
+                startDateArray.sort();
+                if (startDateArray.length > 8) {
+                    startDateArray.length = 8;
                 }
-                return unFinishedEventArray.map((event: IScreeningEvent) => {
+                return startDateArray.map((key: string) => {
+                    const event = unstartedEventsByStartDate[key];
                     return {
                         id: event.id,
+                        remainingAttendeeCapacity: event.remainingAttendeeCapacity,
+                        maximumAttendeeCapacity: event.maximumAttendeeCapacity,
                         startDate: dayjs(event.startDate).format('HH:mm'),
                         endDate: dayjs(event.endDate).format('HH:mm'),
                         status: judgeStatusOfScreeningEvent(event),
@@ -253,6 +273,8 @@ export default Vue.extend({
                 &::after {
                     display: inline-block;
                     content: '';
+                    background-repeat: no-repeat;
+                    vertical-align: sub;
                 }
                 &.ticketstatus-circle {
                     &::after {
