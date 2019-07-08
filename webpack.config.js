@@ -1,6 +1,7 @@
 const { resolve } = require('path');
 const nodeExternals = require('webpack-node-externals');
 const keysTransformer = require('ts-transformer-keys/transformer').default;
+const TSLintPlugin = require('tslint-webpack-plugin');
 
 module.exports = {
     target: 'node',
@@ -8,7 +9,6 @@ module.exports = {
         __dirname: true,
     },
     mode: 'development',
-    // devtool: 'inline-source-map',
     externals: [nodeExternals()],
     context: resolve(__dirname, 'server'),
     entry: {
@@ -21,36 +21,27 @@ module.exports = {
     module: {
         rules: [
             {
-                enforce: 'pre',
-                test: /\.ts$/,
-                use: [
-                    {
-                        loader: 'tslint-loader',
-                        options: {
-                            typeCheck: true,
-                            fix: true,
-                        },
-                    },
-                ],
-            },
-            {
                 test: /\.ts$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/,
                 options: {
                     configFile: 'tsconfig.json',
+                    experimentalWatchApi: true,
                     getCustomTransformers: (program) => ({
                         before: [keysTransformer(program)],
                     }),
                 },
             },
-            // {
-            //     enforce: 'pre',
-            //     test: /\.js$/,
-            //     use: 'source-map-loader',
-            // },
         ],
     },
+    plugins: [
+        new TSLintPlugin({
+            files: './server/**/*.ts',
+            waitForLinting: true,
+            warningsAsError: true,
+            config: './tslint.json',
+        }),
+    ],
     resolve: {
         extensions: ['.ts', '.js'],
     },
