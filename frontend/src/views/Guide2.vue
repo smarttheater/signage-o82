@@ -55,9 +55,6 @@ export default Vue.extend({
                     socket.on(ENUM_SOCKETIO_EVENT_NAMES.DATA_UPDATED, (updatedData: IStatusDataDic) => {
                         this.statusDataDic = { ...this.statusDataDic, ...updatedData };
                     });
-                    socket.on(ENUM_SOCKETIO_EVENT_NAMES.RELOAD_REQUIRED, () => {
-                        window.location.reload(true);
-                    });
                     socket.on(ENUM_SOCKETIO_EVENT_NAMES.DISCONNECTED, () => {
                         this.socket = null;
                     });

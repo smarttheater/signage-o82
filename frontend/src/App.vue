@@ -2,16 +2,16 @@
     <div v-if="is_initialized" id="app" :class="$route.meta.vertical ? 'verticalrender' : ''">
         >
         <router-view v-if="is_logined" />
-        <div v-else class="loginform">
+        <form v-else class="loginform" @submit.prevent>
             <h2>ID</h2>
             <input v-model="loginId" type="text" name="userId" :disabled="busy_login" @keyup.enter="login" />
 
             <h2>Password</h2>
             <input v-model="password" type="password" name="password" :disabled="busy_login" @keyup.enter="login" />
 
-            <p class="btn btn-login" @click="login"><span>login</span></p>
+            <button type="submit" class="btn btn-login" @click="login">login</button>
             <p v-if="$store.state.errMsg" class="errmsg">{{ $store.state.errMsg }}</p>
-        </div>
+        </form>
     </div>
 </template>
 
@@ -23,6 +23,7 @@ export default Vue.extend({
     name: 'App',
     data() {
         return {
+            busy_login: false,
             is_initialized: false,
             is_logined: false,
             loginId: '',
@@ -58,6 +59,10 @@ export default Vue.extend({
         execLogin(id: string, pass: string) {
             return new Promise(async (resolve, reject) => {
                 try {
+                    if (this.busy_login) {
+                        return resolve();
+                    }
+                    this.busy_login = true;
                     const loginResult = await API_LOGIN(id, pass);
                     // ※ tokenはaxiosのintercepterが保存する
                     this.$store.commit('SET_user', loginResult.user);
@@ -68,6 +73,8 @@ export default Vue.extend({
                     alert(e.message);
                     reject(e);
                 }
+                this.busy_login = false;
+                return true;
             });
         },
         login() {
@@ -136,6 +143,7 @@ li {
     }
     .btn-login {
         display: table;
+        border: none;
         margin: 20px auto;
         width: 160px;
         height: 48px;

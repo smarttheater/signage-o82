@@ -109,7 +109,7 @@ export enum ENUM_SOCKETIO_EVENT_NAMES {
     DISCONNECTED = 'disconnected',
 }
 
-type SubscribableID = EventID | 'none';
+export type SubscribableID = EventID | 'none';
 export interface ISocketSubscribeRequst {
     dataTargetArray: SubscribableID[];
     jwt: string;
