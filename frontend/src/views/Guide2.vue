@@ -2,9 +2,10 @@
     <div v-if="is_initialized" class="svgcontainer guide2">
         <timer v-if="!socket" @tick="fetchJsonData"></timer>
         <div v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName">
-            <h1 :class="`status status-${eventName} status-type-${statusDataDic[eventName].type}`">
+            <h1 :class="`status status-${eventName} status-type-${statusDataDic[eventName].type} status-length-${statusDataDic[eventName].statusString.length}`">
                 <span>{{ statusDataDic[eventName].statusString }}</span>
-                <div v-show="statusDataDic[eventName].type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE" class="cover"></div>
+                <div v-show="statusDataDic[eventName].statusString.length > 3" class="cover cover-now"></div>
+                <div v-show="statusDataDic[eventName].type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE" class="cover cover-waiting"></div>
             </h1>
         </div>
     </div>
@@ -97,11 +98,16 @@ export default Vue.extend({
         position: absolute;
         .cover {
             position: absolute;
-            top: 16vw;
-            margin-left: -15vw;
-            left: 50%;
             width: 30vw;
             height: 5vw;
+            margin-left: -15vw;
+            left: 50%;
+            &.cover-waiting {
+                top: 16vw;
+            }
+            &.cover-now {
+                top: -9vw;
+            }
         }
     }
 }
@@ -123,6 +129,14 @@ export default Vue.extend({
     top: 32vw;
     > span {
         font-size: 13vw;
+    }
+    &.status-length-4 {
+        &::before {
+            content: '';
+        }
+        > span {
+            font-size: 11vw;
+        }
     }
 }
 .status-type-TIME {

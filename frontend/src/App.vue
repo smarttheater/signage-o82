@@ -121,7 +121,7 @@ li {
     margin: 96px auto;
     background: #fafafa;
     h2 {
-        margin-bottom: 0;
+        margin-bottom: 8px;
         font-size: 24px;
         user-select: none;
     }

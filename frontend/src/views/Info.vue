@@ -1,7 +1,11 @@
 <template>
     <div v-if="is_initialized" :class="infoClassName">
         <timer @tick="fetchData"></timer>
-        <h1 v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName" :class="`status status-${eventName} status-type-${eventStatus[eventName].type}`">
+        <h1
+            v-for="eventName in REQUIRED_JSONID_ARRAY"
+            :key="eventName"
+            :class="`status status-${eventName} status-type-${eventStatus[eventName].type} status-length-${eventStatus[eventName].statusString.length}`"
+        >
             <span>{{ eventStatus[eventName].statusString }}</span>
         </h1>
 
@@ -331,6 +335,10 @@ export default Vue.extend({
         font-size: 7vw;
         width: 27.6vw;
         right: 0.4vw;
+        &.status-length-4 {
+            font-size: 6vw;
+            margin-top: 1vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -462,6 +470,10 @@ export default Vue.extend({
         font-size: 7vw;
         width: 27.6vw;
         right: 0.4vw;
+        &.status-length-4 {
+            font-size: 6vw;
+            margin-top: 1vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -478,6 +490,8 @@ export default Vue.extend({
         top: 88.5vw;
     }
     .timetable {
+        width: 100vh;
+        height: 100vw;
         margin: 0;
         padding: 0;
         position: relative;
@@ -495,7 +509,7 @@ export default Vue.extend({
             position: absolute;
             text-align: center;
             top: 19vw;
-            width: 50vh;
+            width: 50%;
             &.col-1 {
                 left: 0.4vw;
             }
