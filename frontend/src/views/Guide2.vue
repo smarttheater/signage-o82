@@ -4,7 +4,7 @@
         <div v-for="eventName in REQUIRED_JSONID_ARRAY" :key="eventName">
             <h1 :class="getStatusClassName(statusDataDic[eventName])">
                 <div class="cover cover-now"></div>
-                <span>{{ getStatusText(statusDataDic[eventName].statusString) }}</span>
+                <span>{{ getStatusStringText(statusDataDic[eventName].statusString) }}</span>
                 <div class="cover cover-waiting"></div>
             </h1>
         </div>
