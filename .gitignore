@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 frontend/.git
+dist/jsondata/*.json
 
 .env
 log/
