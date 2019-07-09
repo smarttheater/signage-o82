@@ -1,7 +1,12 @@
 <template>
     <div v-if="is_initialized" class="svgcontainer info">
         <timer @tick="fetchData"></timer>
-        <h1 :class="`status status-body status-type-${statusMode}`">{{ statusTextData.body }}</h1>
+        <h1 :class="`status status-body status-type-${statusMode} ${is_allEventEndend ? 'status-allended' : ''}`">
+            <template v-if="!is_allEventEndend">
+                {{ statusTextData.body }}
+            </template>
+            <span v-else v-html="$store.state.config.CONFIG_MESSAGE_TIMETABLE_ALL_ENDED"></span>
+        </h1>
         <div v-if="statusMode === 'MESSAGE'" class="cover"></div>
     </div>
 </template>
@@ -23,6 +28,7 @@ export default Vue.extend({
     data() {
         return {
             is_initialized: false,
+            is_allEventEndend: false,
             busy_fetchData: false,
             statusTextData: {} as IStatusTextData,
         };
@@ -76,6 +82,13 @@ export default Vue.extend({
                             return dayjs_now.isAfter(dayjs_doorTime) && dayjs_now.isBefore(dayjs_endDate);
                         });
                     }
+                    if (!currentEvent) {
+                        this.is_allEventEndend = !eventArray.find((event) => {
+                            return dayjs_now.isBefore(dayjs(event.doorTime));
+                        });
+                    } else {
+                        this.is_allEventEndend = false;
+                    }
                     const currentDoorTime = currentEvent ? dayjs(currentEvent.doorTime).format('HH:mm') : '';
                     this.statusTextData = {
                         body: currentDoorTime || this.$store.state.config.CONFIG_MESSAGE_GUIDE_NONEXT,
@@ -115,6 +128,11 @@ export default Vue.extend({
             font-size: 12vw;
             margin-left: 1vw;
         }
+    }
+    &.status-allended {
+        font-size: 8vw;
+        line-height: 1.5;
+        margin-top: -6vw;
     }
 }
 .status-footer {
