@@ -17,7 +17,7 @@
             <h1>一括操作</h1>
             <div class="inner">
                 <select v-model="allValue">
-                    <option v-for="option in statusOptionsArrayNotEngawaRoom" :key="option.value" :value="option.value"> {{ option.text }} </option>
+                    <option v-for="option in statusOptionsArrayCommon" :key="option.value" :value="option.value"> {{ option.text }} </option>
                 </select>
                 <p class="btn btn-submit" @click="allUpdate()"><span>更新</span></p>
             </div>
@@ -67,9 +67,23 @@ export default Vue.extend({
         statusOptionsArray(): any[] {
             return EVENT_STATUS_OPTION_ARRAY;
         },
-        statusOptionsArrayNotEngawaRoom(): any[] {
+        statusOptionsArrayAthletic(): any[] {
             return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
                 return option.value !== ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU;
+            });
+        },
+        statusOptionsArrayNotAthletic(): any[] {
+            return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
+                return option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_1F_ENDED && option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_23F_ENDED;
+            });
+        },
+        statusOptionsArrayCommon(): any[] {
+            return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
+                return (
+                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU &&
+                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_1F_ENDED &&
+                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_23F_ENDED
+                );
             });
         },
     },
@@ -106,10 +120,10 @@ export default Vue.extend({
     },
     methods: {
         getStatusOptions(id: ENUM_LOCAL_EVENT_IDS): any[] {
-            if (id !== ENUM_LOCAL_EVENT_IDS.ATHLETIC) {
-                return this.statusOptionsArray;
+            if (id === ENUM_LOCAL_EVENT_IDS.ATHLETIC) {
+                return this.statusOptionsArrayAthletic;
             }
-            return this.statusOptionsArrayNotEngawaRoom;
+            return this.statusOptionsArrayNotAthletic;
         },
         submitStatus(jsonName: ENUM_LOCAL_EVENT_IDS): Promise<void> {
             return new Promise(async (resolve) => {

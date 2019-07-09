@@ -236,7 +236,7 @@ export default Vue.extend({
         position: absolute;
         text-align: center;
         &.status-type-multiline {
-            line-height: 1.4;
+            line-height: 1.3;
         }
     }
     .status-type-TIME {
@@ -302,8 +302,12 @@ export default Vue.extend({
         width: 31.9vw;
         right: 0.4vw;
         &.status-value-ENGAWAROOMDEKAISAICHU {
-            margin-top: -2vw;
+            margin-top: -1.8vw;
             font-size: 4vw;
+        }
+        &.status-value-ATHLETIC_23F_ENDED {
+            font-size: 4.8vw;
+            white-space: nowrap;
         }
     }
     .status-type-TIME {
@@ -374,6 +378,13 @@ export default Vue.extend({
             margin-top: -1vw;
             font-size: 3.6vw;
         }
+        &.status-value-ATHLETIC_1F_ENDED {
+            margin-top: 0.5vw;
+        }
+        &.status-value-ATHLETIC_23F_ENDED {
+            font-size: 4.5vw;
+            margin-top: -2.4vw;
+        }
     }
     .status-type-TIME {
         &::after {
@@ -436,8 +447,12 @@ export default Vue.extend({
         font-size: 7vw;
         width: 31.9vw;
         &.status-value-ENGAWAROOMDEKAISAICHU {
-            margin-top: -2.4vw;
+            margin-top: -2vw;
             font-size: 4vw;
+        }
+        &.status-value-ATHLETIC_23F_ENDED {
+            font-size: 4.8vw;
+            white-space: nowrap;
         }
     }
     .status-type-TIME {
@@ -516,6 +531,10 @@ export default Vue.extend({
         &.status-value-ENGAWAROOMDEKAISAICHU {
             margin-top: -1vw;
             font-size: 3.6vw;
+        }
+        &.status-value-ATHLETIC_23F_ENDED {
+            font-size: 5vw;
+            margin-top: -2.4vw;
         }
     }
     .status-type-TIME {
