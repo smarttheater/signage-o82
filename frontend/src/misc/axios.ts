@@ -4,7 +4,7 @@ import store from '../store';
 export default (): AxiosInstance => {
     const axiosInstance = axios.create({
         timeout: 50000,
-        withCredentials: true,        
+        withCredentials: true,
     });
     axiosInstance.interceptors.response.use((res) => {
         if (res.headers.token) {

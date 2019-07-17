@@ -56,26 +56,24 @@ export default Vue.extend({
         this.is_initialized = true;
     },
     methods: {
-        execLogin(id: string, pass: string) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    if (this.busy_login) {
-                        return resolve();
-                    }
-                    this.busy_login = true;
-                    const loginResult = await API_LOGIN(id, pass);
-                    // ※ tokenはaxiosのintercepterが保存する
-                    this.$store.commit('SET_user', loginResult.user);
-                    this.$store.commit('SET_config', await API_FETCH_CONFIG());
-                    this.is_logined = true;
-                    resolve();
-                } catch (e) {
-                    alert(e.message);
-                    reject(e);
+        async execLogin(id: string, pass: string): Promise<void> {
+            try {
+                if (this.busy_login) {
+                    return;
                 }
+                this.busy_login = true;
+                const loginResult = await API_LOGIN(id, pass);
+                // ※ tokenはaxiosのintercepterが保存する
+                this.$store.commit('SET_user', loginResult.user);
+                this.$store.commit('SET_config', await API_FETCH_CONFIG());
+                this.is_logined = true;
                 this.busy_login = false;
-                return true;
-            });
+            } catch (e) {
+                alert(e.message);
+                this.busy_login = false;
+                throw e;
+            }
+            return;
         },
         login() {
             return this.execLogin(this.loginId, this.password);

@@ -14,7 +14,7 @@
                         </li>
                     </ul>
                 </template>
-                <h1 v-else-if="is_allEnded.MYBABYSTAR" class="allEndedMessage" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED"></h1>
+                <h1 v-else-if="is_allEnded.MYBABYSTAR" class="allEndedMessage">{{ MESSAGE_TIMETABLE_ALL_ENDED }}</h1>
             </div>
         </template>
 
@@ -27,7 +27,7 @@
                         </li>
                     </ul>
                 </template>
-                <h1 v-else-if="is_allEnded[ticketId]" class="allEndedMessage" v-html="CONFIG_MESSAGE_TIMETABLE_ALL_ENDED"></h1>
+                <h1 v-else-if="is_allEnded[ticketId]" class="allEndedMessage">{{ MESSAGE_TIMETABLE_ALL_ENDED }}</h1>
             </div>
         </template>
     </div>
@@ -83,8 +83,8 @@ export default Vue.extend({
             className += orientation;
             return className;
         },
-        CONFIG_MESSAGE_TIMETABLE_ALL_ENDED(): string {
-            return this.$store.state.config.CONFIG_MESSAGE_TIMETABLE_ALL_ENDED;
+        MESSAGE_TIMETABLE_ALL_ENDED(): string {
+            return this.$store.state.config.CONFIG_MESSAGE_TIMETABLE_ALL_ENDED.replace('\\n', '\n');
         },
     },
     async created() {
@@ -166,62 +166,60 @@ export default Vue.extend({
                     };
                 });
             } catch (e) {
-                setErrMsg(`[getManipuldatedTicketStatusArray] ${e.message}`);
+                setErrMsg(`[Info][getManipuldatedTicketStatusArray] ${e.message}`);
                 console.log('[getManipuldatedTicketStatusArray]', e);
                 return [];
             }
         },
-        fetchData() {
-            return new Promise(async (resolve) => {
-                if (this.busy_fetchData) {
-                    return resolve();
-                }
-                this.busy_fetchData = true;
-                try {
-                    const dayjs_now = this.getDayJsObject();
-                    const ticketStatus = await API_FETCH_TICKET_STATUS({
-                        locationBranchCode: '001',
-                        requiredEventIdentifierKeyArray: this.requiredTicketIdArray,
-                        startFrom: dayjs_now
-                            .set('hour', 0)
-                            .set('minute', 0)
-                            .toDate(),
-                        startThrough: dayjs_now
-                            .set('hour', 23)
-                            .set('minute', 59)
-                            .toDate(),
-                    });
-                    const todayScheduleWasFound = Object.keys(ENUM_TICKET_EVENT_IDS).reduce(
-                        (ret, id: string) => {
-                            const status = ticketStatus[id as ENUM_TICKET_EVENT_IDS];
-                            ret[id as ENUM_TICKET_EVENT_IDS] = status && status.length > 0;
+        async fetchData(): Promise<void> {
+            if (this.busy_fetchData) {
+                return;
+            }
+            this.busy_fetchData = true;
+            try {
+                const dayjs_now = this.getDayJsObject();
+                const ticketStatus = await API_FETCH_TICKET_STATUS({
+                    locationBranchCode: '001',
+                    requiredEventIdentifierKeyArray: this.requiredTicketIdArray,
+                    startFrom: dayjs_now
+                        .set('hour', 0)
+                        .set('minute', 0)
+                        .toDate(),
+                    startThrough: dayjs_now
+                        .set('hour', 23)
+                        .set('minute', 59)
+                        .toDate(),
+                });
+                const todayScheduleWasFound = Object.keys(ENUM_TICKET_EVENT_IDS).reduce(
+                    (ret, id: string) => {
+                        const status = ticketStatus[id as ENUM_TICKET_EVENT_IDS];
+                        ret[id as ENUM_TICKET_EVENT_IDS] = status && status.length > 0;
+                        return ret;
+                    },
+                    {} as BoolsByTicketEventId,
+                );
+                if (this.isNoFactory) {
+                    const statusArray = this.getManipuldatedTicketStatusArray(ticketStatus[ENUM_TICKET_EVENT_IDS.MYBABYSTAR]);
+                    this.is_allEnded[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] = todayScheduleWasFound[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] && !statusArray.length;
+                    const colNum = this.isVertical ? 4 : 3;
+                    this.colsStatusArray = splitArray(statusArray, colNum);
+                } else {
+                    this.ticketStatus = this.requiredTicketIdArray.reduce(
+                        (ret, id: ENUM_TICKET_EVENT_IDS) => {
+                            const statusArray = this.getManipuldatedTicketStatusArray(ticketStatus[id]);
+                            this.is_allEnded[id] = todayScheduleWasFound[id] && !statusArray.length;
+                            ret[id] = statusArray;
                             return ret;
                         },
-                        {} as BoolsByTicketEventId,
+                        {} as TypeTicketsStatuses,
                     );
-                    if (this.isNoFactory) {
-                        const statusArray = this.getManipuldatedTicketStatusArray(ticketStatus[ENUM_TICKET_EVENT_IDS.MYBABYSTAR]);
-                        this.is_allEnded[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] = todayScheduleWasFound[ENUM_TICKET_EVENT_IDS.MYBABYSTAR] && !statusArray.length;
-                        const colNum = this.isVertical ? 4 : 3;
-                        this.colsStatusArray = splitArray(statusArray, colNum);
-                    } else {
-                        this.ticketStatus = this.requiredTicketIdArray.reduce(
-                            (ret, id: ENUM_TICKET_EVENT_IDS) => {
-                                const statusArray = this.getManipuldatedTicketStatusArray(ticketStatus[id]);
-                                this.is_allEnded[id] = todayScheduleWasFound[id] && !statusArray.length;
-                                ret[id] = statusArray;
-                                return ret;
-                            },
-                            {} as TypeTicketsStatuses,
-                        );
-                    }
-                } catch (e) {
-                    setErrMsg(`[fetchData] ${e.message}`);
-                    console.log(e);
                 }
-                this.busy_fetchData = false;
-                return resolve();
-            });
+            } catch (e) {
+                setErrMsg(`[Info][fetchData] ${e.message}`);
+                console.log(e);
+            }
+            this.busy_fetchData = false;
+            return;
         },
     },
 });
@@ -257,6 +255,9 @@ export default Vue.extend({
         margin: 0;
         padding: 0;
         text-align: center;
+        .allEndedMessage {
+            white-space: pre;
+        }
         ul {
             padding: 0;
             margin: 0;

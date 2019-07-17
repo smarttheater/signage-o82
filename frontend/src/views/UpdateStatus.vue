@@ -93,16 +93,23 @@ export default Vue.extend({
                 throw new Error('permission denied.');
             }
             const eventStatuses = await new LocalJsonFetcher(this.REQUIRED_JSONID_ARRAY).fetchData();
-            this.REQUIRED_JSONID_ARRAY.forEach(async (jsonId) => {
-                if (!eventStatuses[jsonId]) {
+            await Promise.all([
+                this.REQUIRED_JSONID_ARRAY.filter((jsonId) => {
+                    return !eventStatuses[jsonId];
+                }).map((jsonId) => {
                     alert(`${jsonId}の情報が破損しているため再構築します。`);
-                    try {
-                        eventStatuses[jsonId] = await API_INIT_LOCAL_EVENT_JSON(jsonId);
-                    } catch (e) {
-                        throw new Error(`${jsonId}の再構築に失敗しました`);
-                    }
-                }
-            });
+                    return new Promise((resolve, reject) => {
+                        API_INIT_LOCAL_EVENT_JSON(jsonId)
+                            .then((data) => {
+                                eventStatuses[jsonId] = data;
+                                resolve();
+                            })
+                            .catch((e) => {
+                                reject(new Error(`${jsonId}の再構築に失敗しました ${e.message}`));
+                            });
+                    });
+                }),
+            ]);
             this.eventStatuses = eventStatuses;
             const socket = await getSocket({
                 dataTargetArray: this.REQUIRED_JSONID_ARRAY,
@@ -125,41 +132,37 @@ export default Vue.extend({
             }
             return this.statusOptionsArrayNotAthletic;
         },
-        submitStatus(jsonName: ENUM_LOCAL_EVENT_IDS): Promise<void> {
-            return new Promise(async (resolve) => {
-                let msg = '';
-                try {
-                    await API_UPDATE_LOCAL_EVENT_JSON(this.eventStatuses[jsonName]);
-                    msg = `更新しました: (${dayjs().format('YYYY/MM/DD HH:mm:ss')})`;
-                } catch (e) {
-                    msg = `${EVENT_NAME_DIC[jsonName]}の更新に失敗しました: ${e.message}`;
-                    alert(msg);
-                }
-                this.results = { ...this.results, [jsonName]: msg };
-                resolve();
-            });
+        async submitStatus(jsonName: ENUM_LOCAL_EVENT_IDS): Promise<void> {
+            let msg = '';
+            try {
+                await API_UPDATE_LOCAL_EVENT_JSON(this.eventStatuses[jsonName]);
+                msg = `更新しました: (${dayjs().format('YYYY/MM/DD HH:mm:ss')})`;
+            } catch (e) {
+                msg = `${EVENT_NAME_DIC[jsonName]}の更新に失敗しました: ${e.message}`;
+                alert(msg);
+            }
+            this.results = { ...this.results, [jsonName]: msg };
+            return;
         },
-        allUpdate() {
-            return new Promise(async (resolve) => {
-                if (!window.confirm('一括更新を実行しますか？')) {
-                    return resolve();
-                }
-                let msg = '';
-                try {
-                    await Promise.all(
-                        this.REQUIRED_JSONID_ARRAY.map((id) => {
-                            this.eventStatuses[id].statusString = this.allValue;
-                            return this.submitStatus(id);
-                        }),
-                    );
-                    msg = `一括更新を実行しました: (${dayjs().format('YYYY/MM/DD HH:mm:ss')})`;
-                } catch (e) {
-                    msg = `一括更新でエラーが発生しました: ${e.message}`;
-                    alert(msg);
-                }
-                this.results = { ...this.results, ALL: msg };
-                resolve();
-            });
+        async allUpdate(): Promise<void> {
+            if (!window.confirm('一括更新を実行しますか？')) {
+                return;
+            }
+            let msg = '';
+            try {
+                await Promise.all(
+                    this.REQUIRED_JSONID_ARRAY.map((id) => {
+                        this.eventStatuses[id].statusString = this.allValue;
+                        return this.submitStatus(id);
+                    }),
+                );
+                msg = `一括更新を実行しました: (${dayjs().format('YYYY/MM/DD HH:mm:ss')})`;
+            } catch (e) {
+                msg = `一括更新でエラーが発生しました: ${e.message}`;
+                alert(msg);
+            }
+            this.results = { ...this.results, ALL: msg };
+            return;
         },
     },
 });

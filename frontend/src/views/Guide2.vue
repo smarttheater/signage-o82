@@ -47,43 +47,39 @@ export default Vue.extend({
         getStatusStringText,
         getStatusClassName,
         // 更新受信用のソケットを確立
-        connectSocket(): Promise<SocketIOClient.Socket | null> {
-            return new Promise(async (resolve) => {
-                try {
-                    const socket = await getSocket({
-                        dataTargetArray: this.REQUIRED_JSONID_ARRAY,
-                        jwt: this.$store.state.token,
-                    });
-                    socket.on(ENUM_SOCKETIO_EVENT_NAMES.DATA_UPDATED, (updatedData: IStatusDataDic) => {
-                        this.statusDataDic = { ...this.statusDataDic, ...updatedData };
-                    });
-                    socket.on(ENUM_SOCKETIO_EVENT_NAMES.DISCONNECTED, () => {
-                        this.socket = null;
-                    });
-                    resolve(socket);
-                } catch (e) {
-                    resolve(null);
-                }
-            });
+        async connectSocket(): Promise<SocketIOClient.Socket | null> {
+            try {
+                const socket = await getSocket({
+                    dataTargetArray: this.REQUIRED_JSONID_ARRAY,
+                    jwt: this.$store.state.token,
+                });
+                socket.on(ENUM_SOCKETIO_EVENT_NAMES.DATA_UPDATED, (updatedData: IStatusDataDic) => {
+                    this.statusDataDic = { ...this.statusDataDic, ...updatedData };
+                });
+                socket.on(ENUM_SOCKETIO_EVENT_NAMES.DISCONNECTED, () => {
+                    this.socket = null;
+                });
+                return socket;
+            } catch (e) {
+                return null;
+            }
         },
         // ソケットが確立できなかった時だけ動く定期取得用関数
-        fetchJsonData() {
-            return new Promise(async (resolve) => {
-                if (this.busy_fetchJsonData) {
-                    return resolve();
-                }
-                setErrMsg('');
-                this.busy_fetchJsonData = true;
-                try {
-                    this.statusDataDic = await this.jsonFetcher.fetchData();
-                    this.connectSocket().catch(); // ソケット通信の確立を再試行させる
-                } catch (e) {
-                    console.log(e);
-                    setErrMsg(`[fetchJsonData] ${e.message}`);
-                }
-                this.busy_fetchJsonData = false;
-                return resolve();
-            });
+        async fetchJsonData(): Promise<void> {
+            if (this.busy_fetchJsonData) {
+                return;
+            }
+            setErrMsg('');
+            this.busy_fetchJsonData = true;
+            try {
+                this.statusDataDic = await this.jsonFetcher.fetchData();
+                this.connectSocket().catch(); // ソケット通信の確立を再試行させる
+            } catch (e) {
+                console.log(e);
+                setErrMsg(`[Guide2][fetchJsonData] ${e.message}`);
+            }
+            this.busy_fetchJsonData = false;
+            return;
         },
     },
 });

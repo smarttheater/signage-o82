@@ -1,1 +1,3 @@
-src/Constants.ts
+.git/
+node_modules/
+dist/
