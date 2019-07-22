@@ -5,13 +5,13 @@ import { API_LOGGER } from '../misc/api';
 import {
     ENUM_LOCAL_EVENT_IDS,
     IStatusDataDic,
-    IScreeningEvent,
     ILocalEventJSON,
     ENUM_CONFIG_STATUS_THRESHOLD_TYPE,
     ENUM_TIKECT_STATUS,
     ENUM_LOCAL_EVENT_STATUS_TYPE,
     EVENT_ENUM_EVENT_STATUSSTRING_DIC,
     ENUM_EVENT_STATUSSTRING_ID,
+    EVENT_STATUS_HIDE_NOW_ARRAY,
 } from '../Constants';
 
 // PHPなどのsleepと同じ
@@ -23,6 +23,7 @@ export const sleep = (ms: number): Promise<void> => {
 export const setErrMsg = (msg: string): void => {
     const logmsg = msg ? `[${dayjs().format('YYYY-MM-DD HH:mm:ss')}]${msg}` : '';
     if (logmsg) {
+        console.log(logmsg);
         API_LOGGER(logmsg).catch();
     }
     return store.commit('SET_errMsg', logmsg);
@@ -66,14 +67,14 @@ export const validateLocalEventName = (name: string): void => {
 
 // ローカルイベントJSONのステータステキストを得る
 export const getStatusStringText = (value: number | string): string => {
-    return typeof value === 'number' ? String(value) : EVENT_ENUM_EVENT_STATUSSTRING_DIC[value as ENUM_EVENT_STATUSSTRING_ID];
+    return typeof value === 'number' ? String(value) : EVENT_ENUM_EVENT_STATUSSTRING_DIC[value as ENUM_EVENT_STATUSSTRING_ID] || '';
 };
 
 // ローカルイベントJSONからclassNameを作る
 export const getStatusClassName = (eventJSON: ILocalEventJSON): string => {
     const text = getStatusStringText(eventJSON.statusString);
     let className = `status status-${eventJSON.name} status-type-${eventJSON.type} status-value-${eventJSON.statusString} status-length-${text.length} `;
-    if (text.length > 3) {
+    if (EVENT_STATUS_HIDE_NOW_ARRAY.indexOf(eventJSON.statusString as any) !== -1) {
         className += 'status-hide-now ';
     }
     if (eventJSON.type === ENUM_LOCAL_EVENT_STATUS_TYPE.MESSAGE) {
@@ -117,35 +118,27 @@ export class LocalJsonFetcher {
     public requiredNameArray: string[];
 
     constructor(requiredNameArray: ENUM_LOCAL_EVENT_IDS[]) {
-        requiredNameArray.forEach((name) => {
-            validateLocalEventName(name);
-        });
+        requiredNameArray.forEach(validateLocalEventName);
         this.requiredNameArray = requiredNameArray;
     }
 
-    public fetchData(): Promise<IStatusDataDic> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const res = await Promise.all(
-                    this.requiredNameArray.map((name: string) => {
-                        validateLocalEventName(name);
-                        return axios().get(`/json/${name}.json?${Date.now()}`);
-                    }),
-                );
-                resolve(
-                    this.requiredNameArray.reduce((a: any, b: string, index: number) => {
-                        if (typeof res[index].data !== 'object') {
-                            return a;
-                        }
-                        a[b] = res[index].data;
-                        return a;
-                    }, {}),
-                );
-            } catch (e) {
-                setErrMsg(`[LocalJsonFetcher] ${e.message}`);
-                console.log(e);
-                reject(e);
-            }
-        });
+    public async fetchData(): Promise<IStatusDataDic> {
+        try {
+            const res = await Promise.all(
+                this.requiredNameArray.map((name: string) => {
+                    return axios().get(`/json/${name}.json?${Date.now()}`);
+                }),
+            );
+            return this.requiredNameArray.reduce((a: any, b: string, index: number) => {
+                if (typeof res[index].data !== 'object') {
+                    return a;
+                }
+                a[b] = res[index].data;
+                return a;
+            }, {});
+        } catch (e) {
+            setErrMsg(`[LocalJsonFetcher.fetchData] ${e.message}`);
+            throw e;
+        }
     }
 }

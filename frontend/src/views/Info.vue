@@ -302,9 +302,17 @@ export default Vue.extend({
         font-size: 7vw;
         width: 31.9vw;
         right: 0.4vw;
-        &.status-value-ENGAWAROOMDEKAISAICHU {
+        &.status-value-FURI_CRUNCH_ENGAWAROOMDEKAISAICHU {
             margin-top: -1.8vw;
             font-size: 4vw;
+        }
+        &.status-value-FURI_CRUNCH_HONJITSUBUNKANBAI {
+            margin-top: 1vw;
+            font-size: 5vw;
+        }
+        &.status-value-FURI_CRUNCH_JIKANSHITEIKENHAIFUCHU {
+            margin-top: -2.2vw;
+            font-size: 4.5vw;
         }
         &.status-value-ATHLETIC_23F_ENDED {
             font-size: 4.8vw;
@@ -375,9 +383,17 @@ export default Vue.extend({
             font-size: 6vw;
             margin-top: 1vw;
         }
-        &.status-value-ENGAWAROOMDEKAISAICHU {
+        &.status-value-FURI_CRUNCH_ENGAWAROOMDEKAISAICHU {
             margin-top: -1vw;
             font-size: 3.6vw;
+        }
+        &.status-value-FURI_CRUNCH_HONJITSUBUNKANBAI {
+            margin-top: 2vw;
+            font-size: 4.5vw;
+        }
+        &.status-value-FURI_CRUNCH_JIKANSHITEIKENHAIFUCHU {
+            margin-top: -2.2vw;
+            font-size: 4.5vw;
         }
         &.status-value-ATHLETIC_1F_ENDED {
             margin-top: 0.5vw;
@@ -447,9 +463,17 @@ export default Vue.extend({
         top: 47vw;
         font-size: 7vw;
         width: 31.9vw;
-        &.status-value-ENGAWAROOMDEKAISAICHU {
+        &.status-value-FURI_CRUNCH_ENGAWAROOMDEKAISAICHU {
             margin-top: -2vw;
             font-size: 4vw;
+        }
+        &.status-value-FURI_CRUNCH_HONJITSUBUNKANBAI {
+            margin-top: 0.5vw;
+            font-size: 5vw;
+        }
+        &.status-value-FURI_CRUNCH_JIKANSHITEIKENHAIFUCHU {
+            margin-top: -2.5vw;
+            font-size: 4.5vw;
         }
         &.status-value-ATHLETIC_23F_ENDED {
             font-size: 4.8vw;
@@ -529,9 +553,17 @@ export default Vue.extend({
             font-size: 6vw;
             margin-top: 1vw;
         }
-        &.status-value-ENGAWAROOMDEKAISAICHU {
+        &.status-value-FURI_CRUNCH_ENGAWAROOMDEKAISAICHU {
             margin-top: -1vw;
             font-size: 3.6vw;
+        }
+        &.status-value-FURI_CRUNCH_HONJITSUBUNKANBAI {
+            margin-top: 1vw;
+            font-size: 4.5vw;
+        }
+        &.status-value-FURI_CRUNCH_JIKANSHITEIKENHAIFUCHU {
+            margin-top: -2.5vw;
+            font-size: 4.5vw;
         }
         &.status-value-ATHLETIC_23F_ENDED {
             font-size: 5vw;

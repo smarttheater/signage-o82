@@ -69,21 +69,17 @@ export default Vue.extend({
         },
         statusOptionsArrayAthletic(): any[] {
             return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
-                return option.value !== ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU;
+                return !/FURI_CRUNCH_/.test(option.value as string);
             });
         },
         statusOptionsArrayNotAthletic(): any[] {
             return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
-                return option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_1F_ENDED && option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_23F_ENDED;
+                return !/ATHLETIC_/.test(option.value as string);
             });
         },
         statusOptionsArrayCommon(): any[] {
             return EVENT_STATUS_OPTION_ARRAY.filter((option) => {
-                return (
-                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ENGAWAROOMDEKAISAICHU &&
-                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_1F_ENDED &&
-                    option.value !== ENUM_EVENT_STATUSSTRING_ID.ATHLETIC_23F_ENDED
-                );
+                return !/ATHLETIC_|FURI_CRUNCH_/.test(option.value as string);
             });
         },
     },

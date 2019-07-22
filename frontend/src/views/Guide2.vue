@@ -146,7 +146,20 @@ export default Vue.extend({
             font-size: 11vw;
         }
     }
-    &.status-value-ENGAWAROOMDEKAISAICHU {
+    &.status-value-FURI_CRUNCH_HONJITSUBUNKANBAI {
+        > span {
+            margin-top: 2vw;
+            font-size: 7.5vw;
+        }
+    }
+    &.status-value-FURI_CRUNCH_JIKANSHITEIKENHAIFUCHU {
+        > span {
+            margin-top: -4vw;
+            line-height: 1.2;
+            font-size: 7.5vw;
+        }
+    }
+    &.status-value-FURI_CRUNCH_ENGAWAROOMDEKAISAICHU {
         > span {
             margin-top: -4vw;
             font-size: 6.6vw;

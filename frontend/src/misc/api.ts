@@ -5,36 +5,32 @@ import { LOCAL_API_URL, ISearchEventRequest, TypeTicketsStatuses, ILocalEventJSO
 
 const API_ENDPOINT = process.env.NODE_ENV !== 'production' ? `${LOCAL_API_URL}/api` : '/api';
 
-const APIREQ = (reqName: string, axiosPromise: AxiosPromise): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const res = await axiosPromise;
-            if (!res || !res.data) {
-                throw new Error('server response empty');
-            }
-            return resolve(res.data);
-        } catch (e) {
-            let msg = `[API][${reqName}] ${e.message}`;
-            if ((e.status !== 500 || e.status !== 404) && e.response && e.response.data) {
-                msg = e.response.data;
-            }
-            return reject(new Error(msg));
+const APIREQ = async (reqName: string, axiosPromise: AxiosPromise): Promise<any> => {
+    try {
+        const res = await axiosPromise;
+        if (!res || !res.data) {
+            throw new Error('server response empty');
         }
-    });
+        return res.data;
+    } catch (e) {
+        let msg = `[API][${reqName}] ${e.message}`;
+        if ((e.status !== 500 || e.status !== 404) && e.response && e.response.data) {
+            msg = e.response.data;
+        }
+        throw new Error(msg);
+    }
 };
 
 // クライアント用ロガー (失敗してもresolve)
 export const API_LOGGER = async (message: string): Promise<{ success: boolean }> => {
-    return new Promise(async (resolve) => {
-        let success = false;
-        try {
-            await axios().post(`${API_ENDPOINT}/util/logger`, { message: `[${store.state.user.loginId}]${message}` });
-            success = true;
-        } catch (e) {
-            console.log('[API_LOGGER]', e);
-        }
-        resolve({ success });
-    });
+    let success = false;
+    try {
+        await axios().post(`${API_ENDPOINT}/util/logger`, { message: `[${store.state.user.loginId}]${message}` });
+        success = true;
+    } catch (e) {
+        console.log('[API_LOGGER]', e);
+    }
+    return { success };
 };
 
 // 環境変数のCONIG値取得
